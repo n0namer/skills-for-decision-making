@@ -1,0 +1,59 @@
+{
+  "name": "skills-for-decision-making",
+  "description": "Decision-making skills for AI agents, built on Algorithms for Decision Making",
+  "version": "1.0.0",
+  "author": "romainsimon",
+  "license": "MIT",
+  "source": "Kochenderfer, Wheeler & Wray, Algorithms for Decision Making (MIT Press, 2022)",
+  "skills": [
+    {
+      "slug": "framing-decisions",
+      "name": "Framing Decisions",
+      "path": "framing-decisions/SKILL.md",
+      "description": "Turns a vague \"what should we do about X\" into a scored decision - explicit actions, an explicit unknown, an explicit prior, and one utility scale - then picks by maximum expected utility and checks the result for framing effects. Use when facing a choice between options under uncertainty, when a decision has stalled in circular debate, when someone asks \"should we do A or B\", or before writing any decision record, strategy memo, or roadmap commitment."
+    },
+    {
+      "slug": "valuing-information",
+      "name": "Valuing Information",
+      "path": "valuing-information/SKILL.md",
+      "description": "Prices research, tests, surveys, dashboards and experiments before running them, by computing how much the result would raise expected utility - which is zero whenever no outcome would change the decision. Use when someone proposes an A/B test, user survey, market study, competitor analysis, analytics build, consultant, pilot, or \"let's gather more data\", and when deciding how large a study needs to be."
+    },
+    {
+      "slug": "allocating-effort",
+      "name": "Allocating Effort",
+      "path": "allocating-effort/SKILL.md",
+      "description": "Splits scarce time, budget or traffic across competing products, channels, campaigns or variants by treating them as a multi-armed bandit - Thompson sampling over beta posteriors, with optimism for anything not yet tried enough to judge. Use when deciding what to work on next, how to divide a marketing budget, which product to prioritise, whether to kill something that is underperforming, or when picking a winner among test variants."
+    },
+    {
+      "slug": "planning-horizons",
+      "name": "Planning Horizons",
+      "path": "planning-horizons/SKILL.md",
+      "description": "Decides how far ahead to plan, what to discount future payoffs by, and which backlog items can be dropped without analysis - using receding-horizon planning, an explicit discount factor, and branch-and-bound pruning against the incumbent. Use when building a roadmap, prioritising a backlog, arguing about short-term versus long-term, setting quarterly or annual plans, or when planning has become an end in itself."
+    },
+    {
+      "slug": "stress-testing-plans",
+      "name": "Stress Testing Plans",
+      "path": "stress-testing-plans/SKILL.md",
+      "description": "Validates a plan before committing to it - checks whether the ranking survives the assumptions, finds the most likely way it fails, and makes the trade-offs explicit via a Pareto frontier instead of an invented single score. Use before a launch, price change, migration, infrastructure change or major commitment, when running a premortem, when two objectives conflict, or when a decision depends on an assumption nobody has tested."
+    },
+    {
+      "slug": "tracking-beliefs",
+      "name": "Tracking Beliefs",
+      "path": "tracking-beliefs/SKILL.md",
+      "description": "Separates signal from noise in metrics you cannot observe directly, updating a belief from evidence instead of reacting to the latest reading - Bayesian updates over competing explanations, and a filter that says whether this week's move is real. Use when a metric moves and someone wants to act, when diagnosing why traffic or revenue changed, when a dashboard number contradicts intuition, or when deciding whether a trend is real yet."
+    },
+    {
+      "slug": "reading-rivals",
+      "name": "Reading Rivals",
+      "path": "reading-rivals/SKILL.md",
+      "description": "Models what a competitor will do next and what happens if you respond - best response, equilibrium, and the difference between a rival who optimises perfectly and one who does not. Use before a price change or price war, when a competitor launches something, when deciding whether to match a rival's move, when analysing a market with few players, or when someone asks \"what will they do if we do this\"."
+    },
+    {
+      "slug": "learning-from-outcomes",
+      "name": "Learning From Outcomes",
+      "path": "learning-from-outcomes/SKILL.md",
+      "description": "Turns past decisions into calibrated judgment - scoring old predictions against what happened, assigning credit for delayed results, and separating a bad decision from a good decision that lost. Use during a retrospective, postmortem, quarterly or monthly review, when reviewing decisions taken 30+ days ago, when attributing a result to a cause, or when someone claims to have called something."
+    }
+  ],
+  "language": "en"
+}

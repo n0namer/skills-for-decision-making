@@ -1,0 +1,10 @@
+{
+  "_comment": "ceiling is the optimistic annual contribution if everything goes right. floor is what a candidate actually delivered once evaluated. Anything whose best case is below the incumbent's realized floor can be dropped unread.",
+  "candidates": [
+    { "name": "affiliate program",  "ceiling": 60000, "floor": 18000 },
+    { "name": "second language",    "ceiling": 44000 },
+    { "name": "mobile app",         "ceiling": 90000 },
+    { "name": "referral widget",    "ceiling": 12000 },
+    { "name": "Zapier integration", "ceiling": 15000 }
+  ]
+}

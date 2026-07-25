@@ -1,0 +1,11 @@
+{
+  "_comment": "Paywall hardness. Every row is a real configuration that was measured or estimated. Nothing on the frontier is wrong; the frontier is where the argument actually lives.",
+  "objectives": { "monthlyRevenue": "max", "organicSignups": "max", "supportLoad": "min" },
+  "options": [
+    { "name": "no paywall",        "monthlyRevenue": 1200, "organicSignups": 3100, "supportLoad": 40 },
+    { "name": "soft paywall",      "monthlyRevenue": 3400, "organicSignups": 2100, "supportLoad": 55 },
+    { "name": "hard paywall",      "monthlyRevenue": 4900, "organicSignups": 900,  "supportLoad": 30 },
+    { "name": "hard + free trial", "monthlyRevenue": 4700, "organicSignups": 1800, "supportLoad": 70 },
+    { "name": "metered",           "monthlyRevenue": 3300, "organicSignups": 1900, "supportLoad": 80 }
+  ]
+}

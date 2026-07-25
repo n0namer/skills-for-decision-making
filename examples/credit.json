@@ -1,0 +1,9 @@
+{
+  "_comment": "This quarter's revenue jump. Which past decision earned it? Recency bias says the most recent one; the trace says otherwise.",
+  "decisions": [
+    { "name": "launched the paid tier", "periodsAgo": 0 },
+    { "name": "rewrote the landing page", "periodsAgo": 1 },
+    { "name": "started the SEO programme", "periodsAgo": 5 },
+    { "name": "fixed onboarding drop-off", "periodsAgo": 2 }
+  ]
+}

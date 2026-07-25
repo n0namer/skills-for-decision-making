@@ -1,0 +1,10 @@
+{
+  "_comment": "Five products competing for the same build hours. wins/losses are whatever counts as a conversion for that product this quarter. A product with almost no data gets pulled toward its prior, not toward zero.",
+  "arms": [
+    { "name": "product-a", "wins": 41, "losses": 380 },
+    { "name": "product-b", "wins": 12, "losses": 60 },
+    { "name": "product-c", "wins": 2,  "losses": 9 },
+    { "name": "product-d", "wins": 0,  "losses": 14 },
+    { "name": "product-e", "wins": 7,  "losses": 130 }
+  ]
+}

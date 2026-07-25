@@ -1,0 +1,17 @@
+{
+  "_comment": "Every row is a probability stated in a past decision record, paired with what actually happened.",
+  "records": [
+    { "p": 0.9,  "outcome": true,  "note": "paid tier ships on time" },
+    { "p": 0.8,  "outcome": false, "note": "SEO page ranks top 10" },
+    { "p": 0.8,  "outcome": true,  "note": "churn stays under 6%" },
+    { "p": 0.7,  "outcome": false, "note": "rival does not launch free tier" },
+    { "p": 0.7,  "outcome": true,  "note": "onboarding lifts activation" },
+    { "p": 0.6,  "outcome": false, "note": "affiliate program pays back in 2 quarters" },
+    { "p": 0.6,  "outcome": true,  "note": "annual plan adoption above 20%" },
+    { "p": 0.5,  "outcome": false, "note": "second language pays for itself" },
+    { "p": 0.3,  "outcome": false, "note": "enterprise inbound materializes" },
+    { "p": 0.2,  "outcome": true,  "note": "support load falls after paywall" },
+    { "p": 0.95, "outcome": true,  "note": "infra bill stays under budget" },
+    { "p": 0.9,  "outcome": false, "note": "no incident this quarter" }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "_comment": "Estimated value of the best plan found when planning N weeks ahead. Past the point where this flattens, more planning buys nothing.",
+  "returnsByDepth": { "2": 41000, "4": 58000, "8": 71000, "13": 76000, "26": 77200, "52": 77500 }
+}

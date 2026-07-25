@@ -1,0 +1,12 @@
+{
+  "_comment": "A pricing standoff with one rival. Payoffs are annual profit in thousands. Run this before any price cut: the equilibrium is usually worse for both of you than the status quo.",
+  "players": ["us", "rival"],
+  "actions": { "us": ["hold", "cut"], "rival": ["hold", "cut"] },
+  "payoffs": {
+    "hold|hold": [100, 100],
+    "hold|cut":  [55, 130],
+    "cut|hold":  [130, 55],
+    "cut|cut":   [70, 70]
+  },
+  "observedCounts": { "rival": { "hold": 9, "cut": 2 } }
+}

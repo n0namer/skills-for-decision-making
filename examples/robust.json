@@ -1,0 +1,9 @@
+{
+  "_comment": "Same three plans evaluated under model assumptions we are not sure about. The point is not to find the safest plan, it is to see whether the ranking survives the assumptions.",
+  "matrix": {
+    "ship paid tier":     { "churn stays flat": 52000, "churn doubles": 8000,  "a rival launches free": -12000 },
+    "double down on SEO": { "churn stays flat": 31000, "churn doubles": 19000, "a rival launches free": 14000 },
+    "rebuild onboarding": { "churn stays flat": 22000, "churn doubles": 26000, "a rival launches free": 17000 }
+  },
+  "scenarioWeights": { "churn stays flat": 0.55, "churn doubles": 0.25, "a rival launches free": 0.2 }
+}

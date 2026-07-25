@@ -1,0 +1,10 @@
+{
+  "_comment": "Is the traffic drop an algorithm update or a tracking bug? transition is how the world drifts on its own; likelihood is how probable this week's evidence is under each explanation.",
+  "belief": { "algorithm update": 0.4, "tracking bug": 0.3, "seasonal dip": 0.3 },
+  "transition": {
+    "algorithm update": { "algorithm update": 0.9, "tracking bug": 0.05, "seasonal dip": 0.05 },
+    "tracking bug":     { "algorithm update": 0.1, "tracking bug": 0.8,  "seasonal dip": 0.1 },
+    "seasonal dip":     { "algorithm update": 0.1, "tracking bug": 0.05, "seasonal dip": 0.85 }
+  },
+  "likelihood": { "algorithm update": 0.7, "tracking bug": 0.1, "seasonal dip": 0.25 }
+}

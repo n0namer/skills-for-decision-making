@@ -1,0 +1,28 @@
+{
+  "_comment": "Three ways to spend the next quarter of build time. Values are the cash position at the end of the quarter, not the delta, so a log utility can be applied directly.",
+  "actions": [
+    {
+      "action": "ship the paid tier",
+      "outcomes": [
+        { "value": 140000, "p": 0.25 },
+        { "value": 95000,  "p": 0.5 },
+        { "value": 60000,  "p": 0.25 }
+      ]
+    },
+    {
+      "action": "double down on SEO",
+      "outcomes": [
+        { "value": 115000, "p": 0.4 },
+        { "value": 92000,  "p": 0.45 },
+        { "value": 78000,  "p": 0.15 }
+      ]
+    },
+    {
+      "action": "rebuild onboarding",
+      "outcomes": [
+        { "value": 101000, "p": 0.7 },
+        { "value": 88000,  "p": 0.3 }
+      ]
+    }
+  ]
+}

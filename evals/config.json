@@ -1,0 +1,57 @@
+{
+  "workspace": "evals/workspace",
+  "cacheDir": "evals/cache",
+  "model": "claude-sonnet-4-6",
+  "gradingModel": "claude-haiku-4-5-20251001",
+  "timeoutMs": 900000,
+  "_comment": "runCommand and gradeCommand are argv templates. {model} and {tools} are substituted; the prompt is written to the process stdin. Adjust these if your CLI differs.",
+  "runCommand": [
+    "claude",
+    "-p",
+    "--model",
+    "{model}",
+    "--allowed-tools",
+    "{tools}"
+  ],
+  "gradeCommand": [
+    "claude",
+    "-p",
+    "--model",
+    "{model}"
+  ],
+  "skills": {
+    "framing-decisions": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "valuing-information": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "allocating-effort": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "planning-horizons": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "stress-testing-plans": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "tracking-beliefs": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "reading-rivals": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    },
+    "learning-from-outcomes": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are advising the founder of a small software business. Answer the following."
+    }
+  },
+  "_comment_baseline": "Baselines are deliberately neutral. These skills teach how to frame a problem, so a baseline prompt that names the frame ('advise on whether research is worth doing') hands the model the skill's main contribution and collapses the measured delta. Use a role prime only for skills that carry domain facts rather than framing."
+}

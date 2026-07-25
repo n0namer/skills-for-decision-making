@@ -1,0 +1,33 @@
+{
+  "name": "skills-for-decision-making",
+  "version": "1.0.0",
+  "description": "Decision-making skills for AI agents, built on Algorithms for Decision Making",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "sdm": "scripts/calc.js"
+  },
+  "files": [
+    "lib/",
+    "scripts/",
+    "examples/"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "smoke": "bash test/smoke.sh",
+    "validate": "node test/validate-skills.js",
+    "check": "npm test && npm run smoke && npm run validate",
+    "evals": "node evals/run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "agent-skills",
+    "decision-making",
+    "expected-utility",
+    "value-of-information",
+    "bandit",
+    "thompson-sampling"
+  ]
+}

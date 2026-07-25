@@ -1,0 +1,41 @@
+{
+  "_comment": "Should we run a pricing survey before committing to a price rise? The states are the hidden truth; the observations are things we could go and measure first.",
+  "states": [
+    { "name": "market tolerates +40%", "p": 0.35 },
+    { "name": "market tolerates +15%", "p": 0.4 },
+    { "name": "market tolerates nothing", "p": 0.25 }
+  ],
+  "actions": [
+    {
+      "name": "raise price 40%",
+      "utility": { "market tolerates +40%": 45000, "market tolerates +15%": 5000, "market tolerates nothing": -28000 }
+    },
+    {
+      "name": "raise price 15%",
+      "utility": { "market tolerates +40%": 20000, "market tolerates +15%": 18000, "market tolerates nothing": -6000 }
+    },
+    {
+      "name": "hold price",
+      "utility": { "market tolerates +40%": 0, "market tolerates +15%": 0, "market tolerates nothing": 0 }
+    }
+  ],
+  "observations": [
+    {
+      "name": "survey 200 users",
+      "cost": 1500,
+      "outcomes": [
+        { "name": "enthusiastic", "likelihood": { "market tolerates +40%": 0.7, "market tolerates +15%": 0.25, "market tolerates nothing": 0.05 } },
+        { "name": "lukewarm",     "likelihood": { "market tolerates +40%": 0.25, "market tolerates +15%": 0.55, "market tolerates nothing": 0.3 } },
+        { "name": "hostile",      "likelihood": { "market tolerates +40%": 0.05, "market tolerates +15%": 0.2, "market tolerates nothing": 0.65 } }
+      ]
+    },
+    {
+      "name": "scrape competitor pricing",
+      "cost": 400,
+      "outcomes": [
+        { "name": "rivals are cheaper", "likelihood": { "market tolerates +40%": 0.5, "market tolerates +15%": 0.5, "market tolerates nothing": 0.5 } },
+        { "name": "rivals are pricier", "likelihood": { "market tolerates +40%": 0.5, "market tolerates +15%": 0.5, "market tolerates nothing": 0.5 } }
+      ]
+    }
+  ]
+}

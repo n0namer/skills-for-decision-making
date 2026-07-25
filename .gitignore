@@ -1,0 +1,6 @@
+node_modules/
+evals/workspace/
+evals/cache/
+evals/benchmark.json
+.DS_Store
+*.log

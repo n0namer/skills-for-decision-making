@@ -1,0 +1,4 @@
+{
+  "_comment": "Weekly MRR readings. Stripe settlement lag, refunds and annual plans all add noise, so the raw week-over-week delta is not the signal.",
+  "observations": [4820, 4910, 4760, 5020, 4880, 4950, 5090, 4870, 5140, 5210, 4990, 5330]
+}
