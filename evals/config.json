@@ -4,6 +4,10 @@
   "model": "claude-sonnet-4-6",
   "gradingModel": "claude-haiku-4-5-20251001",
   "timeoutMs": 900000,
+  "provider": "claude-cli",
+  "_comment_provider": "provider selects how the subject model is reached. 'claude-cli' is agentic: the subject gets a filesystem, finds SKILL.md itself and runs the calculator, which is how the skill is actually used. 'openrouter' is inline: no filesystem and no tools, so SKILL.md is pasted into the prompt. Inline measures whether the skill's CONTENT carries to another model, and assertions requiring the calculator will fail under it. Never compare an inline number to an agentic one. gradingProvider defaults to provider; pin it to keep the grader fixed while varying the subject.",
+  "openrouterBaseUrl": "https://openrouter.ai/api/v1",
+  "_comment_openrouter": "For a cross-model run: set provider to 'openrouter', set model to an OpenRouter id (anthropic/claude-opus-4.1, openai/gpt-5, google/gemini-2.5-pro, ...), keep gradingProvider and gradingModel fixed, and export OPENROUTER_API_KEY.",
   "_comment": "runCommand and gradeCommand are argv templates. {model} and {tools} are substituted; the prompt is written to the process stdin. Adjust these if your CLI differs.",
   "runCommand": [
     "claude",

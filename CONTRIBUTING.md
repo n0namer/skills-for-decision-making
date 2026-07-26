@@ -115,6 +115,40 @@ node evals/run.js --workers 8                 # more in flight
 Needs a `claude` CLI on PATH and `ANTHROPIC_API_KEY` set. Adjust `runCommand` and
 `gradeCommand` in `evals/config.json` for a different agent.
 
+### Running against other models
+
+There are two providers, and they do not measure the same thing.
+
+| Provider | Transport | What it measures |
+|---|---|---|
+| `claude-cli` | agentic: real filesystem, real tool use | The skill as it is actually used. The subject finds `SKILL.md` itself, reads the reference files it decides it needs, and runs the calculator. |
+| `openrouter` | inline: no filesystem, no tools | Whether the skill's *content* carries to another model. `SKILL.md` is pasted into the prompt. |
+
+```bash
+cp evals/config.json evals/config.gpt.json
+# edit: provider -> "openrouter", model -> an OpenRouter id
+export OPENROUTER_API_KEY=...
+node evals/run.js --config evals/config.gpt.json
+```
+
+Three rules:
+
+**Never compare an inline number to an agentic one.** Assertions that require running the
+calculator fail under `openrouter` by construction. That is a property of the transport,
+not of the skill, and mixing the two produces a table that means nothing.
+
+**Keep the grader fixed while varying the subject.** Set `gradingProvider` and
+`gradingModel` explicitly. Changing both ends at once makes cross-model numbers
+uninterpretable.
+
+**Never edit `evals/config.json` while a run is in flight.** Use `--config`. A second run
+reading the file mid-swap will silently use the wrong model and report numbers that look
+real. This has happened. That is why the flag exists.
+
+A run where every call errored is reported as an error, not as a score of zero. A partial
+run prints how many calls failed and warns that the numbers cover only what completed. An
+average over a failed run is worse than no number.
+
 Every eval runs twice, with and without the skill, and only the **delta** counts. A skill
 scoring 95% with and 95% without is not helping.
 
