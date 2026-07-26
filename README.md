@@ -12,7 +12,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/skills-8-brightgreen" alt="8 skills">
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="zero dependencies">
-  <img src="https://img.shields.io/badge/eval%20delta-%2B44%20to%20%2B55%20pts-brightgreen" alt="eval delta +44 to +55 points">
+  <img src="https://img.shields.io/badge/eval%20delta-%2B39%20pts%20over%20baseline-brightgreen" alt="eval delta +39 points over baseline">
 </p>
 
 ---
@@ -182,19 +182,35 @@ node evals/run.js --skill valuing-information
 node evals/run.js                          # 31 evals, 150 assertions, both modes
 ```
 
-Measured with Sonnet on three of the eight skills:
+Measured with claude-sonnet-4-6 across all 8 skills, 31 cases, 150 assertions:
 
 ```
-skill                    with   without  delta   assertions
------------------------  -----  -------  ------  ----------
-valuing-information        95%      40%  + 55%           20
-allocating-effort          94%      50%  + 44%           18
-tracking-beliefs           89%      44%  + 44%           18
+skill                   with   without  delta   assertions
+----------------------  -----  -------  ------  ----------
+valuing-information       95%      40%   + 55%          20
+stress-testing-plans      85%      35%   + 50%          20
+planning-horizons        100%      53%   + 47%          15
+allocating-effort         94%      50%   + 44%          18
+tracking-beliefs          89%      44%   + 44%          18
+framing-decisions         89%      47%   + 42%          19
+reading-rivals            89%      63%   + 26%          19
+learning-from-outcomes    67%      57%   + 10%          21
 ```
 
-The other five ship with evals written but not yet run. `node evals/run.js` does the set.
+**These are single-run numbers and the noise is real.** One run per arm, so treat the
+per-skill figures as roughly plus or minus ten points. Concretely: `learning-from-outcomes`
+measured 86/81 on one sweep and 67/57 on the next, with only a small edit between them.
+Both arms moved together, which is variance rather than signal. The ordering at the top and
+bottom of the table is stable; the middle rows are not meaningfully distinguishable from
+each other.
 
-Two things the harness caught, both worth knowing if you write skills yourself:
+**`learning-from-outcomes` is the weak one, at +10.** Its baseline scores 57%, because a
+capable model already knows how to run a decent retrospective: separate process from
+outcome, don't punish variance, check the proxy metric. The skill's remaining value is
+narrow, mostly forcing the calculator to be run instead of Brier scores being estimated in
+prose. If you only install some of these, install that one last.
+
+Three things the harness caught, all worth knowing if you write skills yourself:
 
 **The first draft of `valuing-information` scored 70%.** Reading the failed assertions
 showed why: the skill said what to *think* and never said what to *put in the answer*, so
@@ -206,6 +222,11 @@ template took it to 95%. The same fix went into the other seven.
 framing the skill teaches. Same skill, same evals: **0%** delta against a primed baseline,
 **+55%** against a neutral one. Measure a framing skill against a primed baseline and you
 will conclude, wrongly, that it does nothing.
+
+**Editing a skill did not invalidate its cached results.** The with-skill prompt only points
+at `SKILL.md`, so the cache key never changed when the file did, and `--reuse-cache` would
+happily serve pre-edit answers. Every revision would have appeared to change nothing. The
+key now includes a content hash of the skill and all its references.
 
 ## Layout
 

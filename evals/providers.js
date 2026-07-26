@@ -16,7 +16,8 @@
 // the mode so the two are never compared as if they were the same measurement.
 
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 /** Spawn a command, feed it a prompt on stdin, return stdout. */
 function shell(argv, prompt, { cwd, timeoutMs }) {
@@ -160,4 +161,31 @@ export async function grade(config, prompt, root) {
     template(config.gradeCommand, { model: config.gradingModel }),
     prompt,
     { cwd: root, timeoutMs: config.timeoutMs });
+}
+
+/**
+ * Content hash of a skill: SKILL.md plus every reference file, sorted so the
+ * result is stable. This goes into the cache key for with_skill runs so that
+ * editing a skill invalidates its cached answers. Without it, --reuse-cache
+ * keeps serving pre-edit answers and every revision appears to change nothing,
+ * which turns the revise-and-measure loop into theatre.
+ */
+export function skillFingerprint(root, skill) {
+  const parts = [];
+  const walk = (dir) => {
+    const entries = readdirSync(dir, { withFileTypes: true })
+      .sort((a, b) => a.name.localeCompare(b.name));
+    for (const entry of entries) {
+      const full = dir + '/' + entry.name;
+      if (entry.isDirectory()) {
+        if (entry.name === 'evals') continue;  // assertions are hashed separately
+        walk(full);
+      } else if (entry.name.endsWith('.md')) {
+        parts.push(entry.name, readFileSync(full, 'utf8'));
+      }
+    }
+  };
+  walk(root + '/' + skill);
+  return createHash('sha256').update(parts.join(String.fromCharCode(0)))
+    .digest('hex').slice(0, 16);
 }

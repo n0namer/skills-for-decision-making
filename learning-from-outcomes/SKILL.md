@@ -46,9 +46,16 @@ works without it.
 
 ### 2. Score them
 
+**Run the calculator. Do not compute these by hand.**
+
 ```bash
 node scripts/calc.js calibrate predictions.json
 ```
+
+Brier decomposition, bin assignment and the base-rate benchmark are exactly the kind of
+arithmetic that comes out subtly wrong when done in prose, and a miscalibration verdict
+derived from a wrong number is worse than no verdict. Paste the real output into the
+review.
 
 Input shape: `examples/calibrate.json`. Four numbers matter:
 
@@ -113,8 +120,16 @@ re-reading the same memorable ones.
 
 ### 6. Update the priors that were wrong
 
-The output of a review is not a list of lessons. It is a set of **changed numbers** that
-will be used next time:
+**A lesson that does not change a number will not change a decision.** State that, then
+act on it: the output of a review is not a list of lessons, it is a set of **changed
+numbers**, each written into a named file that will actually be read next time. "We should
+be more careful about X" survives one quarter. "The prior on X is 0.3, in
+`runbooks/traffic-drops.md`" survives indefinitely.
+
+Name the destination for every number. A revised estimate with no home is a lesson
+wearing a number's clothes.
+
+Numbers worth changing:
 
 - The prior in a diagnosis set (**tracking-beliefs**)
 - The reference-class estimate for how long something takes
@@ -151,7 +166,9 @@ quote base rates until it is not>
 <two records from 6+ months ago, and whether the reasoning still holds>
 
 ## Numbers changed
-- <document>: <old value> -> <new value>, because <evidence>
+<every row needs a destination file, or it is a lesson not a number>
+| number | was | now | lives in | evidence |
+|---|---|---|---|---|
 
 ## Scenarios added
 - <failure trajectory> -> robustness matrix for <class of plan>

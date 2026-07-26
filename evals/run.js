@@ -24,7 +24,7 @@ import { parseArgs } from 'node:util';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildPrompt, complete, grade } from './providers.js';
+import { buildPrompt, complete, grade, skillFingerprint } from './providers.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { values: flags } = parseArgs({
@@ -139,9 +139,11 @@ function cache(key, value) {
 async function runCase(skill, evalCase, mode) {
   const prompt = buildPrompt(config, skill, evalCase, mode, ROOT);
   // Provider and model are in the key so a cross-model run never reuses another
-  // model's answer.
+  // model's answer. The skill fingerprint is in it so editing a SKILL.md or any of
+  // its references invalidates the with_skill entry.
   const key = hash(config.provider ?? 'claude-cli', config.model, skill,
-    String(evalCase.id), mode, prompt, JSON.stringify(evalCase.assertions));
+    String(evalCase.id), mode, prompt, JSON.stringify(evalCase.assertions),
+    mode === 'with_skill' ? skillFingerprint(ROOT, skill) : 'baseline');
   const hit = cached(key);
   if (hit) {
     log(`  cached  ${skill}/${evalCase.name} [${mode}] ${hit.passed}/${hit.total}`);
