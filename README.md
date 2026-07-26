@@ -57,9 +57,22 @@ Kochenderfer, Tim Wheeler and Kyle Wray (MIT Press, 2022): 700 pages on acting u
 uncertainty, written for collision-avoidance systems and Mars rovers. The mathematics is
 aimed at aircraft. The problem structure is the one an operator faces every week.
 
-[`references/book-map.md`](references/book-map.md) maps all 27 chapters to where they land,
-including an honest list of what does not transfer and a suggested reading order if you
-only read six chapters.
+[`references/book-map.md`](references/book-map.md) maps every technique chapter to where it
+lands, including an honest list of what does not transfer and a suggested reading order if
+you only read six chapters.
+
+## What it is not
+
+- **Not a forecasting or BI tool.** It does no data collection and connects to nothing. You
+  bring the numbers; it tells you what follows from them.
+- **Not an oracle.** Several of the calculators depend on utilities and priors you supply,
+  and they say so in their own output. The value is that those inputs become visible and
+  arguable instead of buried in someone's prose.
+- **Not a replacement for judgement.** Two of the eight skills exist mainly to tell you
+  that a question is a values decision, or that you should stop analysing and ship.
+- **Not a port of the book's machinery.** Policy gradients, neural value approximation and
+  exact POMDP solvers are in the book and deliberately not here. `references/book-map.md`
+  says which parts do not transfer and why.
 
 ## Install
 
@@ -79,6 +92,14 @@ cd skills-for-decision-making && npm run check
 ```
 
 Zero dependencies. Node 18 or later.
+
+To install one skill rather than all eight, copy that skill's directory plus `scripts/`,
+`lib/` and `examples/`, which it reaches by symlink.
+
+**If your installer fetches files one by one through the GitHub API, it will turn those
+symlinks into small text files** and the calculators will not run. Clone the repo instead,
+or copy the three shared directories in by hand. `npm run check` catches this: the
+validator fails when a skill's `scripts` entry is not a symlink.
 
 ## The eight skills
 
@@ -126,7 +147,7 @@ pay for the repo.
 ## The calculators
 
 Agents are unreliable at beta quantiles, UCB bonuses and expected utility, so none of that
-is left to prose. One CLI, thirteen commands, no dependencies:
+is left to prose. One CLI, seventeen commands, no dependencies:
 
 ```bash
 node scripts/calc.js voi study.json           # is this research worth doing
@@ -138,11 +159,17 @@ node scripts/calc.js belief drop.json         # update across competing explanat
 node scripts/calc.js robust plan.json         # does the ranking survive the assumptions
 node scripts/calc.js pareto options.json      # the trade-off, without an invented score
 node scripts/calc.js prune backlog.json       # branch and bound over a backlog
+node scripts/calc.js horizon depths.json      # where planning deeper stops paying
 node scripts/calc.js game market.json         # equilibrium, cycles, level-k play
 node scripts/calc.js calibrate history.json   # are your probabilities any good
 node scripts/calc.js credit result.json       # who earned this quarter's result
 node scripts/calc.js discount --half-life 6   # what a discount factor commits you to
+node scripts/calc.js precision --successes 3 --trials 10000   # how precise is this rate
+node scripts/calc.js samplesize --p 0.002 --rse 0.2           # how many trials do I need
+node scripts/calc.js importance --true-rate 0.002 --proposal-rate 0.1 --n 10000
 ```
+
+`node scripts/calc.js help` lists them all.
 
 Every command takes `--json`. There is a runnable example for each in
 [`examples/`](examples/).
@@ -243,7 +270,7 @@ skills-for-decision-making/
 ├── lib/                      the maths: beta posteriors, utility, VOI, games, filters
 ├── scripts/calc.js           the CLI
 ├── examples/                 a runnable input for every command
-├── references/book-map.md    all 27 chapters, mapped to where they land
+├── references/book-map.md    the book, chapter by chapter, mapped to where it lands
 ├── evals/                    with-skill versus without-skill harness
 └── test/                     47 unit tests, 23 CLI smoke checks, spec validator
 ```
@@ -263,8 +290,10 @@ without rereading them: beta quantiles against example 15.3, the umbrella decisi
 example 6.3, posterior win probabilities against example 15.1.
 
 Skills reach the shared `scripts/`, `lib/` and `examples/` through symlinks, so each skill
-works standalone while the calculators live in one place. If your installer flattens
-symlinks into text files, clone the repo instead.
+works standalone while the calculators live in one place.
+
+Run `npm run check` before opening a pull request: unit tests, CLI smoke test, and skill
+spec validation. There is no install step, because there are no dependencies.
 
 ## Credit
 

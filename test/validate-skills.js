@@ -98,11 +98,15 @@ for (const skill of skills) {
   // Windows paths
   if (/`[\w./-]*\\[\w./-]+`/.test(body)) fail(skill, 'backslash path found; use forward slashes');
 
-  // Shared resources must be reachable
+  // Shared resources must be reachable. A flattened symlink is a hard failure, not a
+  // warning: installers that fetch files one at a time through the GitHub API turn these
+  // into small text files, and then the calculators silently do not run.
   for (const link of ['scripts', 'examples']) {
     const p = join(ROOT, skill, link);
     if (!existsSync(p)) fail(skill, `missing ${link} symlink to shared resources`);
-    else if (!lstatSync(p).isSymbolicLink()) warn(skill, `${link} is a copy, not a symlink`);
+    else if (!lstatSync(p).isSymbolicLink()) {
+      fail(skill, `${link} is not a symlink; a flattened install breaks the calculators`);
+    }
   }
 
   // Every command the skill tells the agent to run must exist
