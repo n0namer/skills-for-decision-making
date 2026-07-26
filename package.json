@@ -13,7 +13,7 @@
     "examples/"
   ],
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test test/*.test.js",
     "smoke": "bash test/smoke.sh",
     "validate": "node test/validate-skills.js",
     "check": "npm test && npm run smoke && npm run validate",
