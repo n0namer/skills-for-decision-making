@@ -1,0 +1,27 @@
+name: check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 18 is the floor declared in package.json; 22 is what most people run.
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      # No install step: the repo has no dependencies, and keeping it that way is
+      # the point. If this ever needs `npm ci`, something has gone wrong.
+      - name: unit tests
+        run: npm test
+      - name: CLI smoke test
+        run: npm run smoke
+      - name: skill spec validation
+        run: npm run validate

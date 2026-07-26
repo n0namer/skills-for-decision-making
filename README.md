@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/romainsimon/skills-for-decision-making/actions/workflows/ci.yml"><img src="https://github.com/romainsimon/skills-for-decision-making/actions/workflows/ci.yml/badge.svg" alt="check"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/skills-8-brightgreen" alt="8 skills">
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="zero dependencies">
@@ -292,8 +293,9 @@ example 6.3, posterior win probabilities against example 15.1.
 Skills reach the shared `scripts/`, `lib/` and `examples/` through symlinks, so each skill
 works standalone while the calculators live in one place.
 
-Run `npm run check` before opening a pull request: unit tests, CLI smoke test, and skill
-spec validation. There is no install step, because there are no dependencies.
+CI runs `npm run check` on Node 18 and 22 for every push and pull request: unit tests, CLI
+smoke test, and skill spec validation. There is no install step, because there are no
+dependencies, and keeping it that way is deliberate.
 
 ## Credit
 
