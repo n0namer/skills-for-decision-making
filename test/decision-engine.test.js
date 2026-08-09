@@ -22,6 +22,10 @@ test('DecisionSpec accepts a minimal valid decision', () => {
   assert.deepEqual(validateDecisionSpec(baseSpec), { valid: true, errors: [] });
 });
 
+test('minimal DecisionSpec selects no fake numeric method', () => {
+  assert.deepEqual(selectDecisionMethods(baseSpec), []);
+});
+
 test('DecisionSpec rejects partial criterion weights', () => {
   const spec = {
     ...baseSpec,
