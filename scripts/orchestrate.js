@@ -5,11 +5,13 @@
 //   sdm-orchestrate context [--context .agents/context]
 //   sdm-orchestrate route --text "where should I spend 20 hours?"
 //   sdm-orchestrate plan --text "..." [--signals signals.json] [--decision decision.json]
+//   sdm-orchestrate record --record decision-record.json [--context .agents/context]
 
 import { readFileSync } from 'node:fs';
 
 import { discoverSkills } from '../lib/skill-registry.js';
-import { loadContextRegistry } from '../lib/context-registry.js';
+import { defaultContextDir, loadContextRegistry } from '../lib/context-registry.js';
+import { appendDecisionRecord } from '../lib/decision-log.js';
 import { orchestrate } from '../lib/orchestrator.js';
 import { inferSignals, routeSkills } from '../lib/skill-router.js';
 
@@ -22,7 +24,8 @@ function usage(code = 0) {
     `  sdm-orchestrate registry\n` +
     `  sdm-orchestrate context [--context DIR]\n` +
     `  sdm-orchestrate route --text "REQUEST" [--signals FILE]\n` +
-    `  sdm-orchestrate plan --text "REQUEST" [--signals FILE] [--decision FILE] [--context DIR]\n`);
+    `  sdm-orchestrate plan --text "REQUEST" [--signals FILE] [--decision FILE] [--context DIR]\n` +
+    `  sdm-orchestrate record --record FILE [--context DIR]\n`);
   process.exit(code);
 }
 
@@ -59,6 +62,13 @@ try {
       decisionSpec,
       contextDir: flag('--context'),
     }), null, 2));
+  } else if (command === 'record') {
+    const record = readJson(flag('--record'));
+    if (!record) throw new Error('--record FILE is required');
+    console.log(JSON.stringify(appendDecisionRecord(
+      flag('--context') ?? defaultContextDir(),
+      record,
+    ), null, 2));
   } else {
     throw new Error(`unknown command "${command}"`);
   }
