@@ -39,6 +39,42 @@ test('DecisionSpec rejects partial criterion weights', () => {
   assert.match(result.errors.join('\n'), /either all criteria must have weights/);
 });
 
+test('DecisionSpec rejects partially scored alternatives', () => {
+  const spec = {
+    ...baseSpec,
+    criteria: [
+      { id: 'value', name: 'Value', direction: 'max' },
+      { id: 'effort', name: 'Effort', direction: 'min' },
+    ],
+    alternatives: [
+      { id: 'full', name: 'Full launch', scores: { value: 5, effort: 3 } },
+      { id: 'test', name: 'Small test' },
+      { id: 'wait', name: 'Do nothing for now', scores: { value: 1, effort: 1 } },
+    ],
+  };
+  const result = validateDecisionSpec(spec);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join('\n'), /either all alternatives must have scores or none of them/);
+});
+
+test('DecisionSpec rejects missing or non-numeric criterion scores', () => {
+  const spec = {
+    ...baseSpec,
+    criteria: [
+      { id: 'value', name: 'Value', direction: 'max' },
+      { id: 'effort', name: 'Effort', direction: 'min' },
+    ],
+    alternatives: [
+      { id: 'full', name: 'Full launch', scores: { value: 5, effort: 3 } },
+      { id: 'test', name: 'Small test', scores: { value: 4 } },
+      { id: 'wait', name: 'Do nothing for now', scores: { value: 1, effort: 'low' } },
+    ],
+  };
+  const result = validateDecisionSpec(spec);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join('\n'), /scores\.effort must be a finite number/);
+});
+
 test('router selects expected utility for probabilistic outcomes', () => {
   const spec = {
     ...baseSpec,
