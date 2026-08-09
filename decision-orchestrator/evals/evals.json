@@ -52,6 +52,19 @@
         "Uses learning-from-outcomes or equivalent calibration logic",
         "Treats the new outcome as appended evidence rather than rewriting history"
       ]
+    },
+    {
+      "id": 5,
+      "name": "executes-selected-pipeline-instead-of-returning-routing-only",
+      "prompt": "Use decision-orchestrator. I have 12 hours and need to choose how to split them between two projects. Give me the actual decision, not a list of frameworks.",
+      "expected_output": "Runs the selected framing and allocation pipeline through to a synthesized decision. Skill names may appear only as debug/provenance; the normal answer contains the result of applying them, not merely a routing recommendation.",
+      "files": [],
+      "assertions": [
+        "Does not stop after saying that framing-decisions and allocating-effort should be used",
+        "Actually applies the selected skill instructions to the user's problem",
+        "Carries outputs from earlier pipeline steps into later steps",
+        "Returns one synthesized user-facing decision or an explicit missing-input blocker"
+      ]
     }
   ]
 }
