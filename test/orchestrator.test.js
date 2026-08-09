@@ -66,6 +66,34 @@ test('execution materialization fails closed when a routed skill is missing', ()
   );
 });
 
+test('orchestrator rejects an invalid DecisionSpec before method routing', () => {
+  const skillRoot = tempDir();
+  writeSkill(skillRoot, 'framing-decisions');
+  writeSkill(skillRoot, 'allocating-effort');
+
+  const decisionSpec = {
+    version: '1.0',
+    decision: { id: 'portfolio', title: 'Prioritize projects' },
+    criteria: [
+      { id: 'value', name: 'Value', direction: 'max', weight: 0.7 },
+      { id: 'effort', name: 'Effort', direction: 'min' },
+    ],
+    alternatives: [
+      { id: 'a', name: 'A', scores: { value: 5, effort: 2 } },
+      { id: 'b', name: 'B', scores: { value: 4, effort: 1 } },
+    ],
+  };
+
+  assert.throws(
+    () => prepareOrchestrationExecution({
+      request: 'Распредели время между проектами',
+      skillRoots: [skillRoot],
+      decisionSpec,
+    }),
+    /either all criteria must have weights or none of them/,
+  );
+});
+
 test('research-vs-act routes to framing plus value of information', () => {
   const routed = routeSkills({ needsMoreInformation: true }, []);
   assert.deepEqual(routed.map((x) => x.skill), ['framing-decisions', 'valuing-information']);
