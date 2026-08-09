@@ -5,6 +5,7 @@
 //   sdm-orchestrate context [--context .agents/context]
 //   sdm-orchestrate route --text "where should I spend 20 hours?"
 //   sdm-orchestrate plan --text "..." [--signals signals.json] [--decision decision.json]
+//   sdm-orchestrate bundle --text "..." [--signals signals.json] [--decision decision.json]
 //   sdm-orchestrate record --record decision-record.json [--context .agents/context]
 
 import { readFileSync } from 'node:fs';
@@ -12,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { discoverSkills } from '../lib/skill-registry.js';
 import { defaultContextDir, loadContextRegistry } from '../lib/context-registry.js';
 import { appendDecisionRecord } from '../lib/decision-log.js';
-import { orchestrate } from '../lib/orchestrator.js';
+import { orchestrate, prepareOrchestrationExecution } from '../lib/orchestrator.js';
 import { inferSignals, routeSkills } from '../lib/skill-router.js';
 
 const args = process.argv.slice(2);
@@ -25,6 +26,7 @@ function usage(code = 0) {
     `  sdm-orchestrate context [--context DIR]\n` +
     `  sdm-orchestrate route --text "REQUEST" [--signals FILE]\n` +
     `  sdm-orchestrate plan --text "REQUEST" [--signals FILE] [--decision FILE] [--context DIR]\n` +
+    `  sdm-orchestrate bundle --text "REQUEST" [--signals FILE] [--decision FILE] [--context DIR]\n` +
     `  sdm-orchestrate record --record FILE [--context DIR]\n`);
   process.exit(code);
 }
@@ -52,16 +54,20 @@ try {
     const signals = readJson(flag('--signals')) ?? inferSignals(request);
     const registry = discoverSkills();
     console.log(JSON.stringify({ request, signals, routing: routeSkills(signals, registry) }, null, 2));
-  } else if (command === 'plan') {
+  } else if (command === 'plan' || command === 'bundle') {
     const request = flag('--text') ?? '';
     const signals = readJson(flag('--signals'));
     const decisionSpec = readJson(flag('--decision'));
-    console.log(JSON.stringify(orchestrate({
+    const options = {
       request,
       signals,
       decisionSpec,
       contextDir: flag('--context'),
-    }), null, 2));
+    };
+    const result = command === 'bundle'
+      ? prepareOrchestrationExecution(options)
+      : orchestrate(options);
+    console.log(JSON.stringify(result, null, 2));
   } else if (command === 'record') {
     const record = readJson(flag('--record'));
     if (!record) throw new Error('--record FILE is required');
