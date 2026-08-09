@@ -8,6 +8,13 @@
     "allowTargetAllByDefault": false,
     "unmanagedConflictPolicy": "fail-closed",
     "fullRepositoryCheckRequiredBeforeSync": false,
+    "sameSessionUpdateAndRun": {
+      "requirePostSyncSkillReload": true,
+      "allowPreUpdateInMemorySkill": false,
+      "requireRuntimeRevisionMatch": true,
+      "normalDecisionOrchestratorCommand": "bundle",
+      "planningCommandCompletesUserTask": false
+    },
     "report": [
       "oldRevision",
       "newRevision",
