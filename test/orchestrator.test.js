@@ -41,9 +41,26 @@ test('Russian allocation request infers portfolio/resource signals', () => {
   assert.equal(signals.portfolioDecision, true);
 });
 
+test('plain project evaluation request is recognized as portfolio decision', () => {
+  const signals = inferSignals('Оцени мои текущие проекты и скажи, что оставить');
+  assert.equal(signals.portfolioDecision, true);
+  assert.equal(signals.resourceAllocation, false);
+});
+
+test('English project-time request infers portfolio/resource signals', () => {
+  const signals = inferSignals('I have 20 hours and three active projects. Help me decide where to put the time.');
+  assert.equal(signals.resourceAllocation, true);
+  assert.equal(signals.portfolioDecision, true);
+});
+
 test('resource allocation routes to framing plus allocating effort', () => {
   const routed = routeSkills({ resourceAllocation: true }, []);
   assert.deepEqual(routed.map((x) => x.skill), ['framing-decisions', 'allocating-effort']);
+});
+
+test('portfolio evaluation without resource split does not force bandit allocation', () => {
+  const routed = routeSkills({ portfolioDecision: true, resourceAllocation: false }, []);
+  assert.deepEqual(routed.map((x) => x.skill), ['framing-decisions']);
 });
 
 test('routing does not silently drop a required skill when registry is incomplete', () => {
@@ -118,6 +135,21 @@ test('context registry selects all active projects in portfolio mode', () => {
   const selected = selectRelevantContext(context, { portfolioDecision: true });
   assert.deepEqual(selected.projects.map((p) => p.id), ['a', 'c']);
   assert.equal(selected.resources.time.available, 10);
+});
+
+test('context registry treats common Notion paused/completed statuses as inactive', () => {
+  const root = tempDir();
+  writeFileSync(join(root, 'projects.json'), JSON.stringify({ projects: [
+    { id: 'active-ru', status: 'Активный' },
+    { id: 'pause-ru', status: 'На паузе' },
+    { id: 'parking-ru', status: 'Парковка' },
+    { id: 'done-ru', status: 'Завершён' },
+    { id: 'paused-en', status: 'paused' },
+    { id: 'active-en', status: 'active' },
+  ] }));
+  const context = loadContextRegistry(root);
+  const selected = selectRelevantContext(context, { portfolioDecision: true });
+  assert.deepEqual(selected.projects.map((p) => p.id), ['active-ru', 'active-en']);
 });
 
 test('orchestrator composes registry context and minimal pipeline', () => {
