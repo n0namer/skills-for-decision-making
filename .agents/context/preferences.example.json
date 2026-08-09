@@ -1,0 +1,12 @@
+{
+  "decisionPolicy": {
+    "preferReversibleTests": true,
+    "requireProvenanceForProbabilities": true,
+    "neverInventCriterionWeights": true
+  },
+  "mcdaWeights": null,
+  "notes": [
+    "Only store explicit user-owned preferences here.",
+    "If weights are absent, use Pareto rather than generating weights with an LLM."
+  ]
+}
