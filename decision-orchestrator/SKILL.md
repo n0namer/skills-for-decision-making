@@ -1,42 +1,86 @@
 ---
 name: decision-orchestrator
-description: Automatically routes ordinary decision, prioritization, project portfolio, resource allocation, research-vs-act, plan robustness, metric-signal, competitor and retrospective questions to the minimum useful pipeline of decision skills and deterministic calculators. Use this instead of asking the user to name framing-decisions, valuing-information, allocating-effort or other internal skills. Also use when a decision should consider the user's active projects, available time, money, attention or other resources stored in .agents/context.
+description: Single entrypoint for decision work. Automatically routes ordinary decision, prioritization, project portfolio, resource allocation, research-vs-act, plan robustness, metric-signal, competitor and retrospective questions to the minimum useful pipeline of decision skills and deterministic calculators, then executes that pipeline in order. Use this instead of asking the user to name framing-decisions, valuing-information, allocating-effort or other internal skills. Also use when a decision should consider the user's active projects, available time, money, attention or other resources stored in .agents/context.
 license: MIT
 compatibility: Agent Skills compatible; Node.js >=18. Optional Python decision-engine dependencies for MCDA/sensitivity backends.
 metadata:
-  capabilities: decision-routing,skill-orchestration,project-portfolio,resource-allocation,decision-analysis
+  capabilities: decision-routing,skill-orchestration,project-portfolio,resource-allocation,decision-analysis,pipeline-execution
 ---
 
 # Decision orchestrator
+
+This is the **single user-facing entrypoint** for the decision skill system.
 
 The user should describe the real problem, not choose an internal skill. Treat skill names as implementation details unless the user explicitly overrides routing.
 
 ## Core rule
 
-**Understand with the model; route and calculate with code.**
+**Understand with the model; route and calculate with code; execute the selected pipeline before answering.**
+
+Do not stop after routing or planning. A response that only says which skills should be used is incomplete.
 
 The model may translate natural language into structured intent signals and fill a DecisionSpec from facts, estimates and priors. It must not silently choose arbitrary skill chains, invent criterion weights, or perform arithmetic that an available calculator/backend should perform.
+
+## Execution contract
+
+The orchestrator owns the complete lifecycle:
+
+```text
+user request
+  -> infer signals
+  -> load relevant context
+  -> deterministic routing
+  -> minimal ordered pipeline
+  -> materialize selected SKILL.md instructions
+  -> execute every step in order
+  -> run deterministic methods/calculators when selected
+  -> synthesize one final answer
+```
+
+The local AI agent invoking this skill is the `skillRunner`. The repository intentionally does not embed a vendor-specific LLM API. For every `skill` step, apply the materialized `SKILL.md` instructions to the current request/context plus the outputs of previous steps. For every `method` step, use the deterministic calculator/adapter selected by the decision engine.
+
+Each step must see the prior step outputs. If a required skill cannot be loaded, a required deterministic method cannot be executed, or a step fails, stop the pipeline and surface the blocker. Do not silently skip failed steps.
 
 ## Workflow
 
 1. Read the user's request normally. Do not ask which skill to use.
 2. If `.agents/context` exists, use the project/resource/decision context when it can materially change the decision.
 3. Infer structured routing signals. Prefer explicit facts from the request; mark uncertain interpretations as assumptions.
-4. Run the orchestrator plan:
+4. Materialize the executable bundle:
 
 ```bash
-node scripts/orchestrate.js plan --text "<user request>"
+node scripts/orchestrate.js bundle --text "<user request>"
 ```
 
-For high-stakes or ambiguous routing, write a small signals JSON file and pass `--signals FILE` so the final skill selection is determined by code rather than free-form model choice.
-5. Execute only the skills returned by the pipeline, in order. Do not run every available skill.
-6. If a DecisionSpec is available, pass it with `--decision FILE`; the deterministic method router decides whether expected utility, value of information, MCDA, Pareto or sensitivity analysis is allowed.
-7. Use calculators/library adapters for numerical outputs. The LLM explains the result and identifies weak assumptions.
-8. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
+If `sdm-orchestrate` is installed as a bin command:
+
+```bash
+sdm-orchestrate bundle --text "<user request>"
+```
+
+For high-stakes or ambiguous routing, write a small signals JSON file and pass `--signals FILE`. If a DecisionSpec is available, pass it with `--decision FILE`.
+5. Read `execution.steps` from the bundle and execute **every step in order**.
+   - `kind: skill`: use the embedded `instructions`; do not merely mention the skill name.
+   - `kind: method`: run the deterministic calculator/adapter appropriate for that method.
+   - feed each completed step's output into the next step.
+6. Do not execute skills that are absent from the pipeline. Do not add extra skills because they seem interesting.
+7. If structured numeric inputs are incomplete, use the selected skill to obtain/structure only the missing values. Never invent them.
+8. Synthesize one user-facing answer from the completed pipeline. Do not dump the execution bundle unless debug output was requested.
+9. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
 
 ```bash
 node scripts/orchestrate.js record --record decision-record.json
 ```
+
+### Planning/debug only
+
+`plan` is for diagnostics and tests. It is **not** the normal user workflow:
+
+```bash
+sdm-orchestrate plan --text "<request>"
+```
+
+If you invoked `plan`, you still have not completed the user's task.
 
 ## Context source of truth
 
@@ -117,15 +161,17 @@ When debug mode is requested, add:
 
 ```markdown
 ## Routing
-<skills selected, in order, and deterministic methods selected from DecisionSpec>
+<skills selected, execution order, completed step statuses, and deterministic methods>
 ```
 
 ## Gotchas
 
-- **Do not ask the user to pick a skill.** Skill names are an internal implementation detail unless the user explicitly overrides routing.
+- **Do not ask the user to pick a skill.** `decision-orchestrator` is the single entrypoint.
+- **Do not stop at routing or planning.** Execute all selected steps before answering.
 - **Do not let the LLM choose arbitrary weights.** Missing MCDA weights means Pareto, not invented percentages.
 - **Do not run every skill.** More skills add latency and conflicting advice; use the minimum pipeline that covers the request.
 - **Do not confuse a project list with value.** Projects are alternatives; ranking must still depend on goals, resources, evidence and constraints.
 - **Do not treat missing context as zero.** Missing money, time, stress or probability data is UNKNOWN, not 0.
 - **Do not rewrite history.** `decisions.jsonl` is append-only; record outcomes as new records linked to the original decision.
 - **Do not hide provenance.** Facts, estimates, priors and calculated values must remain distinguishable.
+- **Do not silently skip an executor failure.** Fail closed and tell the user what input/tool is missing.
