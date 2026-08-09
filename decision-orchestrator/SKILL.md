@@ -58,11 +58,38 @@ user asks for project evaluation
   -> host agent reads Notion project database
   -> normalize relevant project/resource fields
   -> save temporary context.json
-  -> sdm-orchestrate bundle --text "..." --context-json context.json
+  -> build DecisionSpec when comparable criteria are available
+  -> sdm-orchestrate bundle --text "..." --context-json context.json --decision decision.json
   -> execute every bundle step
 ```
 
 If a required host tool is unavailable, surface that blocker. Do not silently fall back to stale remembered data when the user explicitly requested the external source.
+
+## Data-shape and method-suitability gate
+
+Do not confuse different kinds of portfolio evidence.
+
+### Multi-criteria project scores
+
+If projects have comparable fields such as value, effort, time, risk, stress, strategic value, expected profit or similar criteria, construct a `DecisionSpec` from those **sourced fields before materializing the bundle**.
+
+- each project becomes an alternative;
+- each comparable field becomes a criterion with its real `max`/`min` direction;
+- copy numeric project scores into `alternative.scores`;
+- preserve provenance for sourced values;
+- do not invent missing criterion weights.
+
+Then pass the spec with `--decision FILE`.
+
+If all criteria have explicit user-owned weights, the deterministic method router may select MCDA. If weights are absent, it should select Pareto. This is the normal path for a Notion portfolio that contains fields such as "value" and "effort" but no explicit trade-off weights.
+
+### Bandit allocation
+
+`allocating-effort` uses a multi-armed-bandit model. Its calculator is appropriate only when competing arms share the same countable win event and denominator and there are honest `wins/losses` or equivalent observations.
+
+**Never reinterpret cross-sectional project scores such as value=5 and effort=2 as wins/losses.** Never invent observations merely to make the allocation calculator runnable.
+
+If the pipeline includes `allocating-effort` but the required bandit observations are absent, execute the skill and record the conclusion that exact bandit allocation is currently unsupported by the evidence. Continue with any independently valid selected method such as Pareto/MCDA. Missing bandit data is not permission to silently substitute an unrelated heuristic ratio.
 
 ## Version-coherence contract
 
@@ -87,6 +114,7 @@ user request
   -> acquire relevant external context with host tools
   -> infer signals
   -> normalize context
+  -> build DecisionSpec when the evidence supports structured numeric analysis
   -> deterministic routing
   -> minimal ordered pipeline
   -> materialize selected SKILL.md instructions from the same runtime revision
@@ -104,30 +132,33 @@ Each step must see the prior step outputs. If a required skill cannot be loaded,
 1. Read the user's request normally. Do not ask which skill to use.
 2. Acquire relevant context through available host-agent tools when requested or materially useful. `.agents/context` is only one possible source.
 3. Infer structured routing signals. Prefer explicit facts from the request/source; mark uncertain interpretations as assumptions.
-4. Materialize the executable bundle:
+4. Inspect the retrieved data shape. If the source contains structured decision criteria/scores, construct a `DecisionSpec` before routing numerical methods. If it contains bandit-compatible wins/losses, preserve those separately; do not translate one data model into the other.
+5. Materialize the executable bundle:
 
 ```bash
-node scripts/orchestrate.js bundle --text "<user request>" --context-json <normalized-context.json>
+node scripts/orchestrate.js bundle --text "<user request>" --context-json <normalized-context.json> --decision <decision.json>
 ```
+
+If no `DecisionSpec` is justified by the available data, omit `--decision` rather than inventing one.
 
 If `sdm-orchestrate` is installed as a bin command:
 
 ```bash
-sdm-orchestrate bundle --text "<user request>" --context-json <normalized-context.json>
+sdm-orchestrate bundle --text "<user request>" --context-json <normalized-context.json> --decision <decision.json>
 ```
 
 `--context-json` is optional when no external context is needed. `.agents/context` can still be used with `--context DIR`.
 
-For high-stakes or ambiguous routing, write a small signals JSON file and pass `--signals FILE`. If a DecisionSpec is available, pass it with `--decision FILE`.
-5. Verify runtime revision coherence when the skill was updated in this same request/session.
-6. Read `execution.steps` from the bundle and execute **every step in order**.
+For high-stakes or ambiguous routing, write a small signals JSON file and pass `--signals FILE`.
+6. Verify runtime revision coherence when the skill was updated in this same request/session.
+7. Read `execution.steps` from the bundle and execute **every step in order**.
    - `kind: skill`: use the embedded `instructions`; do not merely mention the skill name.
    - `kind: method`: run the deterministic calculator/adapter appropriate for that method.
    - feed each completed step's output into the next step.
-7. Do not execute skills that are absent from the pipeline. Do not add extra skills because they seem interesting.
-8. If structured numeric inputs are incomplete, use the selected skill and available host tools to obtain/structure only the missing values. Never invent them.
-9. Synthesize one user-facing answer from the completed pipeline. Do not dump the execution bundle unless debug output was requested.
-10. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
+8. Do not execute skills that are absent from the pipeline. Do not add extra skills because they seem interesting.
+9. If structured numeric inputs are incomplete, use the selected skill and available host tools to obtain/structure only the missing values. Never invent them.
+10. Synthesize one user-facing answer from the completed pipeline. Do not dump the execution bundle unless debug output was requested.
+11. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
 
 ```bash
 node scripts/orchestrate.js record --record decision-record.json
@@ -241,6 +272,7 @@ When debug mode is requested, add:
 - **Do not use a stale pre-update skill.** Same-session update-and-run must explicitly reload the new revision.
 - **Do not separate external context acquisition from execution.** Tool-fetched facts must be normalized into the bundle context so downstream skills actually receive them.
 - **Do not build provider-specific integrations when host tools already exist.** Use the host capability boundary.
+- **Do not map project scores to bandit observations.** Value/effort/risk scores and wins/losses are different evidence models.
 - **Do not let the LLM choose arbitrary weights.** Missing MCDA weights means Pareto, not invented percentages.
 - **Do not run every skill.** More skills add latency and conflicting advice; use the minimum pipeline that covers the request.
 - **Do not confuse a project list with value.** Projects are alternatives; ranking must still depend on goals, resources, evidence and constraints.
