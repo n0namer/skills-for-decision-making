@@ -64,7 +64,7 @@ test('router selects MCDA for fully weighted multi-criteria scores', () => {
   assert.deepEqual(selectDecisionMethods(spec), ['mcda']);
 });
 
-test('router uses Pareto when criteria have no complete weights', () => {
+test('router uses Pareto when criteria have no weights', () => {
   const spec = {
     ...baseSpec,
     criteria: [
@@ -76,7 +76,7 @@ test('router uses Pareto when criteria have no complete weights', () => {
       scores: { money: 10 - index, stress: 4 + index },
     })),
   };
-  assert.deepEqual(selectDecisionMethods(spec), ['mcda', 'pareto']);
+  assert.deepEqual(selectDecisionMethods(spec), ['pareto']);
 });
 
 test('router adds sensitivity when parameter ranges exist', () => {
