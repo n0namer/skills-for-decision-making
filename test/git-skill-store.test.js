@@ -36,7 +36,7 @@ function commit(repo, payload) {
   return git(repo, ['rev-parse', 'HEAD']);
 }
 
-test('GitSkillStore materializes and updates a branch through its cache', () => {
+test('GitSkillStore materializes branch revisions into immutable checkouts', () => {
   const origin = temp();
   git(origin, ['init']);
   git(origin, ['config', 'user.email', 'test@example.com']);
@@ -52,7 +52,13 @@ test('GitSkillStore materializes and updates a branch through its cache', () => 
   const v2 = commit(origin, 'v2');
   const second = store.materialize({ repository: origin, ref: branch });
   assert.equal(second.revision, v2);
+  assert.notEqual(second.root, first.root);
   assert.equal(readFileSync(join(second.root, 'skill-a', 'payload.txt'), 'utf8'), 'v2');
+  assert.equal(readFileSync(join(first.root, 'skill-a', 'payload.txt'), 'utf8'), 'v1');
+
+  const repeated = store.materialize({ repository: origin, ref: branch });
+  assert.equal(repeated.root, second.root);
+  assert.equal(repeated.revision, v2);
 });
 
 test('different refs of the same repository use isolated checkouts', () => {
