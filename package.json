@@ -6,13 +6,26 @@
   "license": "MIT",
   "bin": {
     "sdm": "scripts/calc.js",
-    "sdm-decision": "scripts/decision.js"
+    "sdm-decision": "scripts/decision.js",
+    "sdm-orchestrate": "scripts/orchestrate.js",
+    "sdm-context-init": "scripts/init-context.js",
+    "sdm-skills-install": "scripts/install-skills.js"
   },
   "files": [
     "lib/",
     "scripts/",
     "examples/",
     "engine/",
+    ".agents/context/*.example.*",
+    "decision-orchestrator/",
+    "framing-decisions/",
+    "valuing-information/",
+    "allocating-effort/",
+    "planning-horizons/",
+    "stress-testing-plans/",
+    "tracking-beliefs/",
+    "reading-rivals/",
+    "learning-from-outcomes/",
     "requirements-decision-engine.txt"
   ],
   "scripts": {
@@ -28,6 +41,9 @@
   "keywords": [
     "agent-skills",
     "decision-making",
+    "skill-orchestration",
+    "project-portfolio",
+    "resource-allocation",
     "expected-utility",
     "value-of-information",
     "mcda",
