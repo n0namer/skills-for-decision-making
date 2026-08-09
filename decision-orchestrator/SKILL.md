@@ -32,7 +32,11 @@ For high-stakes or ambiguous routing, write a small signals JSON file and pass `
 5. Execute only the skills returned by the pipeline, in order. Do not run every available skill.
 6. If a DecisionSpec is available, pass it with `--decision FILE`; the deterministic method router decides whether expected utility, value of information, MCDA, Pareto or sensitivity analysis is allowed.
 7. Use calculators/library adapters for numerical outputs. The LLM explains the result and identifies weak assumptions.
-8. Record material decisions and later outcomes in the decision/evidence registry when the local workflow supports writes.
+8. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
+
+```bash
+node scripts/orchestrate.js record --record decision-record.json
+```
 
 ## Context source of truth
 
@@ -87,3 +91,41 @@ Do not expose routing chatter in a normal answer unless it helps the user or deb
 - UNKNOWN: required information that is not available
 
 When the answer depends strongly on an estimate, say what value or threshold would flip the decision.
+
+## Output template
+
+Use a compact user-facing result. Keep the implementation pipeline hidden unless debug output is requested.
+
+```markdown
+## Decision
+<recommended action or the exact unresolved choice>
+
+## Why
+<2-5 decision-relevant reasons grounded in facts/calculated results>
+
+## Key assumptions
+<only assumptions capable of changing the answer, with provenance>
+
+## Risk / sensitivity
+<what downside matters and what threshold would flip the decision>
+
+## Next move
+<one bounded reversible action, preferably 48-72h when experimentation is appropriate>
+```
+
+When debug mode is requested, add:
+
+```markdown
+## Routing
+<skills selected, in order, and deterministic methods selected from DecisionSpec>
+```
+
+## Gotchas
+
+- **Do not ask the user to pick a skill.** Skill names are an internal implementation detail unless the user explicitly overrides routing.
+- **Do not let the LLM choose arbitrary weights.** Missing MCDA weights means Pareto, not invented percentages.
+- **Do not run every skill.** More skills add latency and conflicting advice; use the minimum pipeline that covers the request.
+- **Do not confuse a project list with value.** Projects are alternatives; ranking must still depend on goals, resources, evidence and constraints.
+- **Do not treat missing context as zero.** Missing money, time, stress or probability data is UNKNOWN, not 0.
+- **Do not rewrite history.** `decisions.jsonl` is append-only; record outcomes as new records linked to the original decision.
+- **Do not hide provenance.** Facts, estimates, priors and calculated values must remain distinguishable.
