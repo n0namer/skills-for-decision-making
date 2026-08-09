@@ -65,6 +65,21 @@
         "Carries outputs from earlier pipeline steps into later steps",
         "Returns one synthesized user-facing decision or an explicit missing-input blocker"
       ]
+    },
+    {
+      "id": 6,
+      "name": "update-fetch-external-context-and-run-from-one-revision",
+      "prompt": "Update the decision skills from GitHub, read my current projects from the connected project database, and run decision-orchestrator to evaluate the portfolio.",
+      "expected_output": "After updating, reloads the entry skill from the new revision, retrieves project context through the host agent's available tool/connector, normalizes that context into the execution bundle, verifies runtime revision coherence, and executes every selected pipeline step. It must not use a stale pre-update SKILL.md and must not stop at orchestrate plan output.",
+      "files": [],
+      "assertions": [
+        "Does not rely on a decision-orchestrator instruction loaded before the update",
+        "Uses the host agent's connected data tool instead of requiring a provider-specific SDK in the repository",
+        "Passes retrieved project data into the orchestration context rather than keeping it only in free-form chat memory",
+        "Uses bundle or equivalent executable materialization rather than treating plan as completion",
+        "Verifies the orchestration runtime revision matches the newly installed source revision",
+        "Executes framing-decisions and allocating-effort when selected, instead of merely naming them"
+      ]
     }
   ]
 }
