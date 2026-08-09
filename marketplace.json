@@ -7,6 +7,12 @@
   "source": "Kochenderfer, Wheeler & Wray, Algorithms for Decision Making (MIT Press, 2022)",
   "skills": [
     {
+      "slug": "decision-orchestrator",
+      "name": "Decision Orchestrator",
+      "path": "decision-orchestrator/SKILL.md",
+      "description": "Automatically routes ordinary decision, prioritization, project portfolio, resource allocation, research-vs-act, plan robustness, metric-signal, competitor and retrospective questions to the minimum useful pipeline of decision skills and deterministic calculators. Use this instead of asking the user to name framing-decisions, valuing-information, allocating-effort or other internal skills. Also use when a decision should consider the user's active projects, available time, money, attention or other resources stored in .agents/context."
+    },
+    {
       "slug": "framing-decisions",
       "name": "Framing Decisions",
       "path": "framing-decisions/SKILL.md",
