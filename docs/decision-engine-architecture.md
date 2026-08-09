@@ -4,44 +4,77 @@
 
 Turn an ambiguous real-world decision into a reproducible analysis where:
 
-1. the agent frames the decision and gathers evidence;
-2. every important numeric input has provenance;
-3. deterministic or reproducible code performs calculations;
-4. method selection follows explicit rules;
-5. the agent explains results and identifies the next valuable piece of information.
+1. the user invokes one entrypoint: `decision-orchestrator`;
+2. the agent frames the decision and gathers evidence;
+3. every important numeric input has provenance;
+4. deterministic or reproducible code performs calculations;
+5. routing selects the minimum useful skill pipeline;
+6. the selected pipeline is executed, not merely reported;
+7. the agent explains results and identifies the next valuable action.
 
 ## Design rule
 
-**LLM for semantics; code for arithmetic and algorithms.**
+**LLM for semantics and skill execution; code for routing, execution control, arithmetic and algorithms.**
 
-The LLM may propose alternatives, identify uncertainties, search for evidence, and explain results. It must not silently replace a supported calculator or choose an arbitrary mathematical method.
+The LLM may propose alternatives, identify uncertainties, search for evidence, apply the selected skill instructions, and explain results. It must not silently replace a supported calculator, choose an arbitrary skill chain, or choose an arbitrary mathematical method.
 
-## Data flow
+## End-to-end data flow
 
 ```text
 user problem
    |
    v
-skill / LLM framing
+decision-orchestrator                    <- single user-facing skill
+   |
+   +--> intent signals
+   +--> relevant .agents/context
    |
    v
-DecisionSpec 1.0
-   |
-   +--> validation
-   |
-   +--> deterministic method router
-           |
-           +--> existing JS engine: EV / EU / VoI / robustness / calibration
-           +--> MCDA adapter
-           +--> sensitivity adapter
-           +--> later: Bayesian-network / Bayesian-model / optimization adapters
+deterministic skill router
    |
    v
-AnalysisResult
+PipelinePlanner                          <- minimal ordered pipeline + dependencies
    |
    v
-LLM explanation + next test / information action
+PipelineExecutor                         <- execution control / fail closed
+   |
+   +--> skill step -> materialized SKILL.md -> current agent applies instructions
+   |
+   +--> method step -> deterministic calculator / adapter
+   |
+   +--> each output is passed to the next step
+   |
+   v
+DecisionSpec / AnalysisResult / step outputs
+   |
+   v
+one synthesized user-facing answer
 ```
+
+`plan` is diagnostic output. It is not completion. Normal agent execution materializes a `bundle` and processes every selected step before answering.
+
+## Executor boundary
+
+`lib/pipeline-executor.js` is deliberately vendor-neutral. It does not call Claude, OpenAI, Codex, OpenCode, or another model API directly.
+
+It owns the parts that must be deterministic across agent runtimes:
+
+- resolve every selected skill to a real installed/discoverable `SKILL.md`;
+- embed the exact skill instructions into an execution step;
+- preserve planner order and dependencies;
+- pass prior step outputs into later steps;
+- stop immediately when a required step fails;
+- expose an injectable `runSkill` / `runMethod` boundary for the host agent runtime.
+
+The host AI agent that invoked `decision-orchestrator` is the normal `runSkill` implementation. This keeps the system portable while still giving it one orchestration entrypoint.
+
+Programmatic integrations may call `executeOrchestration({ runSkill, runMethod, ... })`. Agent runtimes normally use:
+
+```bash
+sdm-orchestrate bundle --text "<request>"
+```
+
+and then execute `execution.steps` in order as required by `decision-orchestrator/SKILL.md`.
 
 ## DecisionSpec
 
@@ -73,7 +106,7 @@ The router, not the LLM, determines allowed analysis families from the spec:
 |---|---|
 | probabilistic outcomes | Expected Value / Expected Utility |
 | candidate observations + probabilistic decision | Value of Information |
-| multiple scored criteria | MCDA |
+| multiple scored criteria with complete explicit weights | MCDA |
 | multiple unweighted/conflicting criteria | Pareto filter |
 | uncertain parameter ranges | sensitivity analysis |
 | insufficient numeric structure | framing only |
@@ -103,29 +136,13 @@ Each adapter should accept a normalized subset of `DecisionSpec` and return JSON
 - warnings;
 - reproducibility metadata such as random seed when applicable.
 
-## Initial integration sequence
-
-### Phase 1 — now
-
-- DecisionSpec validation
-- deterministic method router
-- reuse existing JS EV/EU/VoI/Pareto/robustness/calibration
-
-### Phase 2 — first external adapters
-
-- MCDA: evaluate Scikit-Criteria as the default permissive-license implementation
-- sensitivity: evaluate SALib
-
-### Phase 3 — only after a demonstrated use case
-
-- pgmpy for dependent probabilistic events / Bayesian networks
-- PyMC for richer Bayesian statistical inference from data
-- pymoo for large multi-objective search/optimization spaces
-
 ## Guardrails
 
-1. Same structured inputs must produce the same result unless the method is explicitly stochastic.
-2. Stochastic methods must accept/report a seed when practical.
-3. Unknown inputs remain unknown; the system may request or estimate them only with explicit provenance.
-4. The agent may not fabricate precision. Prefer ranges and sensitivity tests when evidence is weak.
-5. No external library is added merely because it exists; every dependency requires a concrete decision use case and tests.
+1. The user should not need to choose an internal decision skill; `decision-orchestrator` is the single entrypoint.
+2. A routing/plan response is not task completion. Every selected step must be applied or the system must expose a blocker.
+3. Same structured inputs must produce the same deterministic method result.
+4. Stochastic methods must accept/report a seed when practical.
+5. Unknown inputs remain unknown; the system may request or estimate them only with explicit provenance.
+6. The agent may not fabricate precision or criterion weights.
+7. Pipeline execution is fail-closed: missing skill, missing runner, or failed required step stops the pipeline.
+8. No external library is added merely because it exists; every dependency requires a concrete decision use case and tests.
