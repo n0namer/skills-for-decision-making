@@ -9,6 +9,7 @@
     "sdm-decision": "scripts/decision.js",
     "sdm-orchestrate": "scripts/orchestrate.js",
     "sdm-context-init": "scripts/init-context.js",
+    "sdm-skills": "scripts/skills.js",
     "sdm-skills-install": "scripts/install-skills.js"
   },
   "files": [
@@ -26,7 +27,8 @@
     "tracking-beliefs/",
     "reading-rivals/",
     "learning-from-outcomes/",
-    "requirements-decision-engine.txt"
+    "requirements-decision-engine.txt",
+    "skills.sources.json"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
