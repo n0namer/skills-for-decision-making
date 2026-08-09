@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillSourceManifest": "skills.sources.json",
+  "consumerUpdate": {
+    "repositoryCheckoutPolicy": "cache-only",
+    "allowCheckoutInsideUserProject": false,
+    "targetPolicy": "existing-targets-only",
+    "allowTargetAllByDefault": false,
+    "unmanagedConflictPolicy": "fail-closed",
+    "fullRepositoryCheckRequiredBeforeSync": false,
+    "report": [
+      "oldRevision",
+      "newRevision",
+      "updatedTargets",
+      "changedSkills",
+      "finalStatus"
+    ]
+  },
+  "maintainerUpdate": {
+    "upstreamRepository": "https://github.com/romainsimon/skills-for-decision-making.git",
+    "upstreamBranch": "master",
+    "forkRepository": "https://github.com/n0namer/skills-for-decision-making.git",
+    "forkBaseBranch": "master",
+    "activeDevelopmentRefSource": "skills.sources.json",
+    "upstreamToForkStrategy": "fast-forward-only",
+    "forkBaseToDevelopmentStrategy": "merge",
+    "allowAutomaticForcePush": false,
+    "allowCustomChangesOnForkBase": false
+  }
+}
