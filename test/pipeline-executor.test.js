@@ -103,6 +103,36 @@ test('pipeline executor stops immediately when a step fails', async () => {
   assert.deepEqual(seen, ['a']);
 });
 
+test('host-agent context is normalized and embedded in the execution bundle', () => {
+  const skillRoot = tempDir();
+  writeSkill(skillRoot, 'framing-decisions', 'FRAME');
+  writeSkill(skillRoot, 'allocating-effort', 'ALLOCATE');
+
+  const prepared = prepareOrchestrationExecution({
+    request: 'Оцени активные проекты и распредели время',
+    signals: { resourceAllocation: true, portfolioDecision: true },
+    skillRoots: [skillRoot],
+    contextData: {
+      projects: [
+        { id: 'sales', name: 'Sales', status: 'active' },
+        { id: 'paused', name: 'Paused', status: 'stopped' },
+      ],
+      resources: { time: { availableMinutes: 600 } },
+      provenance: { source: 'notion', details: 'Projects database' },
+    },
+    runtime: { revision: 'abc123', repoRoot: skillRoot },
+  });
+
+  assert.deepEqual(prepared.context.projects.map((item) => item.id), ['sales']);
+  assert.equal(prepared.context.resources.time.availableMinutes, 600);
+  assert.equal(prepared.context.provenance.source, 'notion');
+  assert.equal(prepared.runtime.revision, 'abc123');
+  assert.deepEqual(
+    prepared.execution.steps.map((step) => step.id),
+    ['framing-decisions', 'allocating-effort'],
+  );
+});
+
 test('decision orchestration can be executed through one entrypoint', async () => {
   const skillRoot = tempDir();
   writeSkill(skillRoot, 'framing-decisions', 'FRAME');
