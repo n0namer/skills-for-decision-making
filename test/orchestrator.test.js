@@ -8,7 +8,7 @@ import { discoverSkills, parseSkillFrontmatter } from '../lib/skill-registry.js'
 import { loadContextRegistry, selectRelevantContext } from '../lib/context-registry.js';
 import { inferSignals, routeSkills } from '../lib/skill-router.js';
 import { planPipeline } from '../lib/pipeline-planner.js';
-import { orchestrate } from '../lib/orchestrator.js';
+import { orchestrate, prepareOrchestrationExecution } from '../lib/orchestrator.js';
 
 function tempDir() {
   return mkdtempSync(join(tmpdir(), 'sdm-orchestrator-'));
@@ -44,6 +44,26 @@ test('Russian allocation request infers portfolio/resource signals', () => {
 test('resource allocation routes to framing plus allocating effort', () => {
   const routed = routeSkills({ resourceAllocation: true }, []);
   assert.deepEqual(routed.map((x) => x.skill), ['framing-decisions', 'allocating-effort']);
+});
+
+test('routing does not silently drop a required skill when registry is incomplete', () => {
+  const routed = routeSkills(
+    { resourceAllocation: true },
+    [{ name: 'framing-decisions' }],
+  );
+  assert.deepEqual(routed.map((x) => x.skill), ['framing-decisions', 'allocating-effort']);
+});
+
+test('execution materialization fails closed when a routed skill is missing', () => {
+  const skillRoot = tempDir();
+  writeSkill(skillRoot, 'framing-decisions');
+  assert.throws(
+    () => prepareOrchestrationExecution({
+      request: 'Как распределить 20 часов между проектами?',
+      skillRoots: [skillRoot],
+    }),
+    /pipeline skill is not installed\/discoverable: allocating-effort/,
+  );
 });
 
 test('research-vs-act routes to framing plus value of information', () => {
