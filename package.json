@@ -28,7 +28,11 @@
     "reading-rivals/",
     "learning-from-outcomes/",
     "requirements-decision-engine.txt",
-    "skills.sources.json"
+    "skills.sources.json",
+    "update-policy.json",
+    "AGENTS.md",
+    "UPDATE.md",
+    "docs/skill-lifecycle.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
