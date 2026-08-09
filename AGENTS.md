@@ -21,6 +21,22 @@ When a user gives a link to this branch and asks to install/update/sync skills:
 9. Do not make a full repository checkout or `npm run check` a prerequisite for a normal consumer update. Repository maintainer validation is separate from delivery. The updater/lifecycle operation itself must still fail closed on errors.
 10. After synchronization, report old revision -> new revision, targets updated, skills changed, and final status.
 
+### Same-session update + run
+
+If the same user request says both **update the skills** and **run/use a skill afterward**, do not trust a skill definition that was loaded before synchronization. Many host agents cache skill instructions for the lifetime of a session.
+
+After sync:
+
+1. Resolve the new source revision from lifecycle status/lock.
+2. Explicitly re-read the requested entry skill (`decision-orchestrator/SKILL.md` when applicable) from the new resolved checkout/installed target.
+3. Execute orchestration code from that same revision.
+4. For `decision-orchestrator`, use `bundle`, not `plan`, for normal execution.
+5. Verify `bundle.runtime.revision` equals the newly installed source revision.
+6. Do not read an older cache checkout merely because its path was previously known.
+7. If the revisions differ, stop and reload the new revision before doing user work.
+
+A successful `sync` plus `status: current` proves filesystem state, not that the host agent hot-reloaded an already cached skill definition.
+
 Preferred lifecycle commands from a cache/bootstrap checkout:
 
 ```text
