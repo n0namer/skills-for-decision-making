@@ -43,13 +43,14 @@ test('GitSkillStore materializes and updates a branch through its cache', () => 
   git(origin, ['config', 'user.name', 'Test']);
 
   const v1 = commit(origin, 'v1');
+  const branch = git(origin, ['branch', '--show-current']);
   const store = new GitSkillStore({ cacheRoot: temp() });
-  const first = store.materialize({ repository: origin, ref: 'master' });
+  const first = store.materialize({ repository: origin, ref: branch });
   assert.equal(first.revision, v1);
   assert.equal(readFileSync(join(first.root, 'skill-a', 'payload.txt'), 'utf8'), 'v1');
 
   const v2 = commit(origin, 'v2');
-  const second = store.materialize({ repository: origin, ref: 'master' });
+  const second = store.materialize({ repository: origin, ref: branch });
   assert.equal(second.revision, v2);
   assert.equal(readFileSync(join(second.root, 'skill-a', 'payload.txt'), 'utf8'), 'v2');
 });
@@ -61,11 +62,12 @@ test('different refs of the same repository use isolated checkouts', () => {
   git(origin, ['config', 'user.name', 'Test']);
 
   commit(origin, 'main-v1');
+  const branch = git(origin, ['branch', '--show-current']);
   git(origin, ['branch', 'stable']);
   commit(origin, 'main-v2');
 
   const store = new GitSkillStore({ cacheRoot: temp() });
-  const main = store.materialize({ repository: origin, ref: 'master' });
+  const main = store.materialize({ repository: origin, ref: branch });
   const stable = store.materialize({ repository: origin, ref: 'stable' });
 
   assert.notEqual(main.root, stable.root);
