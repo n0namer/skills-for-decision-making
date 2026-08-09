@@ -1,0 +1,2 @@
+{"id":"decision-001","date":"2026-08-09","question":"Run a small demand test before a full launch?","action":"small-test","forecast":{"successProbability":0.35},"provenance":{"successProbability":"prior"},"reviewDate":"2026-08-16"}
+{"id":"decision-001-outcome","date":"2026-08-16","decisionId":"decision-001","type":"outcome","observed":{"qualifiedConversations":4},"lesson":"Update the prior using the observed test result before scaling."}
