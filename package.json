@@ -5,12 +5,15 @@
   "type": "module",
   "license": "MIT",
   "bin": {
-    "sdm": "scripts/calc.js"
+    "sdm": "scripts/calc.js",
+    "sdm-decision": "scripts/decision.js"
   },
   "files": [
     "lib/",
     "scripts/",
-    "examples/"
+    "examples/",
+    "engine/",
+    "requirements-decision-engine.txt"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
@@ -27,6 +30,8 @@
     "decision-making",
     "expected-utility",
     "value-of-information",
+    "mcda",
+    "topsis",
     "bandit",
     "thompson-sampling"
   ]
