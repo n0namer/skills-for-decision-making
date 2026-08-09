@@ -57,6 +57,7 @@ Example for a Notion portfolio request:
 user asks for project evaluation
   -> host agent reads Notion project database
   -> normalize relevant project/resource fields
+  -> segment obligations from discretionary alternatives
   -> save temporary context.json
   -> build DecisionSpec when comparable criteria are available
   -> sdm-orchestrate bundle --text "..." --context-json context.json --decision decision.json
@@ -64,6 +65,18 @@ user asks for project evaluation
 ```
 
 If a required host tool is unavailable, surface that blocker. Do not silently fall back to stale remembered data when the user explicitly requested the external source.
+
+## Portfolio segmentation gate
+
+Before ranking a project portfolio, distinguish **constraints/commitments** from **discretionary alternatives**.
+
+- A mandatory job, contractual obligation, regulatory requirement or other non-optional commitment is not an alternative that Pareto/MCDA may recommend dropping. Put its required time/budget into `resources` and subtract it from the discretionary capacity first.
+- If the external source has an explicit class/mode such as `Обязательство` / `commitment`, preserve it and exclude that item from the discretionary ranking unless the user explicitly asks whether the commitment itself should be renegotiated or removed.
+- If the source has an explicit current-cycle selector such as `Активен на неделе`, honor it when the request is about the current week/cycle. A project that is globally `Активный` but explicitly inactive for the current cycle should not silently consume this cycle's ranking set.
+- Operational/maintenance work may be reported separately from growth/research alternatives when mixing them would make the comparison meaningless.
+- Show the capacity arithmetic explicitly: total available/committed resource -> mandatory resource -> discretionary resource available for the ranked alternatives.
+
+Do not make a mandatory commitment look attractive merely because its value/effort scores place it on a frontier. Its status as a constraint comes before the ranking method.
 
 ## Data-shape and method-suitability gate
 
@@ -73,7 +86,7 @@ Do not confuse different kinds of portfolio evidence.
 
 If projects have comparable fields such as value, effort, time, risk, stress, strategic value, expected profit or similar criteria, construct a `DecisionSpec` from those **sourced fields before materializing the bundle**.
 
-- each project becomes an alternative;
+- each discretionary project becomes an alternative;
 - each comparable field becomes a criterion with its real `max`/`min` direction;
 - copy numeric project scores into `alternative.scores`;
 - preserve provenance for sourced values;
@@ -114,6 +127,7 @@ user request
   -> acquire relevant external context with host tools
   -> infer signals
   -> normalize context
+  -> segment commitments/constraints from discretionary alternatives
   -> build DecisionSpec when the evidence supports structured numeric analysis
   -> deterministic routing
   -> minimal ordered pipeline
@@ -132,8 +146,9 @@ Each step must see the prior step outputs. If a required skill cannot be loaded,
 1. Read the user's request normally. Do not ask which skill to use.
 2. Acquire relevant context through available host-agent tools when requested or materially useful. `.agents/context` is only one possible source.
 3. Infer structured routing signals. Prefer explicit facts from the request/source; mark uncertain interpretations as assumptions.
-4. Inspect the retrieved data shape. If the source contains structured decision criteria/scores, construct a `DecisionSpec` before routing numerical methods. If it contains bandit-compatible wins/losses, preserve those separately; do not translate one data model into the other.
-5. Materialize the executable bundle:
+4. Segment obligations/constraints from discretionary alternatives and honor explicit current-cycle activity flags when relevant.
+5. Inspect the retrieved data shape. If the source contains structured decision criteria/scores, construct a `DecisionSpec` before routing numerical methods. If it contains bandit-compatible wins/losses, preserve those separately; do not translate one data model into the other.
+6. Materialize the executable bundle:
 
 ```bash
 node scripts/orchestrate.js bundle --text "<user request>" --context-json <normalized-context.json> --decision <decision.json>
@@ -150,15 +165,15 @@ sdm-orchestrate bundle --text "<user request>" --context-json <normalized-contex
 `--context-json` is optional when no external context is needed. `.agents/context` can still be used with `--context DIR`.
 
 For high-stakes or ambiguous routing, write a small signals JSON file and pass `--signals FILE`.
-6. Verify runtime revision coherence when the skill was updated in this same request/session.
-7. Read `execution.steps` from the bundle and execute **every step in order**.
+7. Verify runtime revision coherence when the skill was updated in this same request/session.
+8. Read `execution.steps` from the bundle and execute **every step in order**.
    - `kind: skill`: use the embedded `instructions`; do not merely mention the skill name.
    - `kind: method`: run the deterministic calculator/adapter appropriate for that method.
    - feed each completed step's output into the next step.
-8. Do not execute skills that are absent from the pipeline. Do not add extra skills because they seem interesting.
-9. If structured numeric inputs are incomplete, use the selected skill and available host tools to obtain/structure only the missing values. Never invent them.
-10. Synthesize one user-facing answer from the completed pipeline. Do not dump the execution bundle unless debug output was requested.
-11. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
+9. Do not execute skills that are absent from the pipeline. Do not add extra skills because they seem interesting.
+10. If structured numeric inputs are incomplete, use the selected skill and available host tools to obtain/structure only the missing values. Never invent them.
+11. Synthesize one user-facing answer from the completed pipeline. Do not dump the execution bundle unless debug output was requested.
+12. Record material decisions and later outcomes in the decision/evidence registry when appropriate:
 
 ```bash
 node scripts/orchestrate.js record --record decision-record.json
@@ -272,6 +287,8 @@ When debug mode is requested, add:
 - **Do not use a stale pre-update skill.** Same-session update-and-run must explicitly reload the new revision.
 - **Do not separate external context acquisition from execution.** Tool-fetched facts must be normalized into the bundle context so downstream skills actually receive them.
 - **Do not build provider-specific integrations when host tools already exist.** Use the host capability boundary.
+- **Do not rank mandatory commitments as discretionary projects.** Subtract their resource cost first and report them separately.
+- **Do not ignore explicit current-cycle activity flags.** If the user asks about this week, respect fields such as `Активен на неделе`.
 - **Do not map project scores to bandit observations.** Value/effort/risk scores and wins/losses are different evidence models.
 - **Do not let the LLM choose arbitrary weights.** Missing MCDA weights means Pareto, not invented percentages.
 - **Do not run every skill.** More skills add latency and conflicting advice; use the minimum pipeline that covers the request.
