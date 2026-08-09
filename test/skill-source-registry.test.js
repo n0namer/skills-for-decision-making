@@ -59,3 +59,36 @@ test('duplicate source skill names fail closed', () => {
     /duplicate skill name/,
   );
 });
+
+test('git source discovery is mediated through GitSkillStore adapter', () => {
+  const repo = temp();
+  const materialized = temp();
+  skill(materialized, 'remote-skill');
+
+  const gitStore = {
+    materialize(source) {
+      assert.equal(source.repository, 'example/repo');
+      return {
+        root: materialized,
+        revision: 'abc123',
+        repository: source.repository,
+        ref: source.ref,
+      };
+    },
+  };
+  const manifest = {
+    schemaVersion: 1,
+    sources: [{
+      id: 'remote',
+      type: 'git',
+      repository: 'example/repo',
+      ref: 'main',
+      maxDepth: 2,
+    }],
+  };
+
+  const [found] = discoverRepositorySkills({ repoRoot: repo, manifest, gitStore });
+  assert.equal(found.name, 'remote-skill');
+  assert.equal(found.sourceRevision, 'abc123');
+  assert.equal(found.sourceType, 'git');
+});
