@@ -53,3 +53,22 @@ test('GitSkillStore materializes and updates a branch through its cache', () => 
   assert.equal(second.revision, v2);
   assert.equal(readFileSync(join(second.root, 'skill-a', 'payload.txt'), 'utf8'), 'v2');
 });
+
+test('different refs of the same repository use isolated checkouts', () => {
+  const origin = temp();
+  git(origin, ['init']);
+  git(origin, ['config', 'user.email', 'test@example.com']);
+  git(origin, ['config', 'user.name', 'Test']);
+
+  commit(origin, 'main-v1');
+  git(origin, ['branch', 'stable']);
+  commit(origin, 'main-v2');
+
+  const store = new GitSkillStore({ cacheRoot: temp() });
+  const main = store.materialize({ repository: origin, ref: 'master' });
+  const stable = store.materialize({ repository: origin, ref: 'stable' });
+
+  assert.notEqual(main.root, stable.root);
+  assert.equal(readFileSync(join(main.root, 'skill-a', 'payload.txt'), 'utf8'), 'main-v2');
+  assert.equal(readFileSync(join(stable.root, 'skill-a', 'payload.txt'), 'utf8'), 'main-v1');
+});
