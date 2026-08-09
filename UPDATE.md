@@ -265,6 +265,52 @@ Do not automatically force-push or destructively reset shared branches.
 
 ## One-line intent mapping for agents
 
+### Canonical user message for a consumer update
+
+Treat the following message as an explicit request to update installed skills from
+the delivery branch, even when it is wrapped in Markdown or contains the link as a
+Markdown hyperlink:
+
+```text
+**Обнови мои skills по инструкции отсюда:**
+https://github.com/n0namer/skills-for-decision-making/tree/refactor/skill-lifecycle-foundations
+```
+
+The equivalent Markdown form is also canonical:
+
+```text
+**Обнови мои skills по инструкции отсюда:**
+[https://github.com/n0namer/skills-for-decision-making/tree/refactor/skill-lifecycle-foundations](https://github.com/n0namer/skills-for-decision-making/tree/refactor/skill-lifecycle-foundations)
+```
+
+When this trigger is received, follow this exact order:
+
+1. Classify it as **Consumer update A**, never Maintainer update B.
+2. Extract and verify repository `https://github.com/n0namer/skills-for-decision-making.git`
+   and ref `refactor/skill-lifecycle-foundations` from the URL. Never substitute
+   `master` or another branch.
+3. Read `skills.sources.json`, `update-policy.json`, and this file.
+4. Use or create the updater only in the lifecycle cache, never as a checkout in the
+   user's project. Keep the actual user project as `--project-root`.
+5. Run `status` before `sync` for the relevant scope and inspect existing managed
+   profiles. Synchronize each already-used profile separately (`agents`/`codex`,
+   `opencode`, `cline`, or `claude`); do not use `--target all` for convenience.
+6. If an existing target is unmanaged or drifted, inspect its `SKILL.md` identity.
+   Use `--force` only when the target is verified to contain this repository's
+   decision-making skills and the user explicitly requested the update, as in the
+   canonical message above. Otherwise stop and report the conflict.
+7. Run `sync --mode auto`, then run `status` again. A successful update requires
+   every synchronized item to be `current` and to point to the resolved commit of
+   the configured branch.
+8. Report source repository, ref, old resolved SHA, new resolved SHA, target profiles,
+   changed skills, lifecycle transaction IDs, and final status. If any profile fails,
+   report it as blocked; do not claim a complete update or silently continue with a
+   different source.
+
+The full repository maintainer check is useful when developing this repository, but
+it is not a prerequisite for a consumer sync. The lifecycle manager must still pass
+its own validation and fail closed on source, conflict, lock, or filesystem errors.
+
 If the user says:
 
 > Update my skills from this branch/link.
