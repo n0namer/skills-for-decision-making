@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "repository",
+      "type": "local",
+      "path": ".",
+      "maxDepth": 2
+    }
+  ]
+}
