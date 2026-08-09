@@ -32,6 +32,21 @@ test('consumer update policy forbids normal project checkouts', () => {
   assert.equal(policy.consumerUpdate.fullRepositoryCheckRequiredBeforeSync, false);
 });
 
+test('same-session update-and-run requires the new skill revision', () => {
+  const policy = json('update-policy.json');
+  const sameSession = policy.consumerUpdate.sameSessionUpdateAndRun;
+  assert.equal(sameSession.requirePostSyncSkillReload, true);
+  assert.equal(sameSession.allowPreUpdateInMemorySkill, false);
+  assert.equal(sameSession.requireRuntimeRevisionMatch, true);
+  assert.equal(sameSession.normalDecisionOrchestratorCommand, 'bundle');
+  assert.equal(sameSession.planningCommandCompletesUserTask, false);
+
+  const agents = readFileSync(join(root, 'AGENTS.md'), 'utf8');
+  assert.match(agents, /Same-session update \+ run/i);
+  assert.match(agents, /bundle\.runtime\.revision/i);
+  assert.match(agents, /not trust a skill definition that was loaded before synchronization/i);
+});
+
 test('maintainer policy tracks the original upstream through fork master', () => {
   const policy = json('update-policy.json');
   assert.equal(
