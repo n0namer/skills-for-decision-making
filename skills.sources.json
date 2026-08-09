@@ -2,9 +2,11 @@
   "schemaVersion": 1,
   "sources": [
     {
-      "id": "repository",
-      "type": "local",
-      "path": ".",
+      "id": "decision-making-fork",
+      "type": "git",
+      "repository": "https://github.com/n0namer/skills-for-decision-making.git",
+      "ref": "refactor/skill-lifecycle-foundations",
+      "subdir": ".",
       "maxDepth": 2
     }
   ]
