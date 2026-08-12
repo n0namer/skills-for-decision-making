@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "evals": [
+    {
+      "id": "decision-orchestration-existing-suite",
+      "assetType": "flow",
+      "assetId": "decision-orchestration",
+      "kind": "regression-suite",
+      "path": "test/orchestrator.test.js"
+    },
+    {
+      "id": "adaptive-problem-solver-skill-evals",
+      "assetType": "skill",
+      "assetId": "adaptive-problem-solver",
+      "kind": "semantic-evals",
+      "path": "adaptive-problem-solver/evals/evals.json"
+    }
+  ]
+}
