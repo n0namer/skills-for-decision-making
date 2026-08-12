@@ -6,10 +6,14 @@ import { resolve } from 'node:path';
 import {
   applyPlanPatch,
   assertPlan,
+  beginStep,
   createTaskState,
   decideFromVerification,
   loadAssetRegistry,
   nextReadyStep,
+  rankFlowCandidates,
+  recordObservation,
+  recordStepOutcome,
   selectTaskMode,
 } from '../lib/problem-solver/index.js';
 
@@ -40,6 +44,10 @@ function usage(code = 0) {
     '  sdm-solve validate-plan --plan FILE\n' +
     '  sdm-solve init-state --task FILE --plan FILE\n' +
     '  sdm-solve next-step --plan FILE --state FILE\n' +
+    '  sdm-solve begin-step --plan FILE --state FILE --step ID\n' +
+    '  sdm-solve record-outcome --plan FILE --state FILE --step ID --outcome FILE\n' +
+    '  sdm-solve record-observation --state FILE --observation FILE\n' +
+    '  sdm-solve select-flow --query FILE [--root DIR]\n' +
     '  sdm-solve apply-patch --plan FILE --state FILE --patch FILE\n' +
     '  sdm-solve decide --plan FILE --state FILE --step ID --verdict FILE\n',
   );
@@ -63,6 +71,28 @@ try {
     const plan = readJson(flag('--plan'), '--plan FILE');
     const state = readJson(flag('--state'), '--state FILE');
     print({ step: nextReadyStep(plan, state) });
+  } else if (command === 'begin-step') {
+    const plan = readJson(flag('--plan'), '--plan FILE');
+    const state = readJson(flag('--state'), '--state FILE');
+    const stepId = flag('--step');
+    if (!stepId) throw new Error('--step ID is required');
+    print(beginStep(plan, state, stepId));
+  } else if (command === 'record-outcome') {
+    const plan = readJson(flag('--plan'), '--plan FILE');
+    const state = readJson(flag('--state'), '--state FILE');
+    const outcome = readJson(flag('--outcome'), '--outcome FILE');
+    const stepId = flag('--step');
+    if (!stepId) throw new Error('--step ID is required');
+    print(recordStepOutcome(plan, state, stepId, outcome));
+  } else if (command === 'record-observation') {
+    const state = readJson(flag('--state'), '--state FILE');
+    const observation = readJson(flag('--observation'), '--observation FILE');
+    print(recordObservation(state, observation));
+  } else if (command === 'select-flow') {
+    const registry = loadAssetRegistry(resolve(flag('--root') ?? 'registry'));
+    const query = readJson(flag('--query'), '--query FILE');
+    const candidates = rankFlowCandidates(registry.flows, query);
+    print({ best: candidates[0] ?? null, candidates });
   } else if (command === 'apply-patch') {
     const plan = readJson(flag('--plan'), '--plan FILE');
     const state = readJson(flag('--state'), '--state FILE');
