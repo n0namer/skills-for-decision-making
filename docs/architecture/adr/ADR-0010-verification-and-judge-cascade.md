@@ -1,20 +1,9 @@
 # ADR-0010: Verification and Judge Cascade
 
-- Status: **Accepted**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0021**
 
-## Context
-Self-reflection without independent evidence is an unreliable correctness mechanism.
+Original decision: prefer external/deterministic evidence before semantic/adversarial judges and self-reflection.
 
-## Decision
-Verification SHALL prefer the strongest low-cost independent signal: observable external result → deterministic test/invariant → source/evidence check → independent semantic judge → adversarial judge → self-reflection. Expensive judges are conditional rather than mandatory after every step.
-
-## Consequences
-- Improves reliability while controlling token cost.
-- Some business outcomes remain difficult to verify automatically.
-
-## Invariants
-- Self-reflection is never the sole verifier for high-impact actions when independent checks exist.
-
-## Revisit triggers
-- Evidence shows a different verification ordering materially improves quality/cost.
+Consolidated with the eval/promotion lifecycle in ADR-0021. See Git history for the original full ADR.

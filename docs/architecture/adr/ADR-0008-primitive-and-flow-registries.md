@@ -1,21 +1,9 @@
 # ADR-0008: Primitive and Flow Registries
 
-- Status: **Accepted**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0020**
 
-## Context
-The planner must reuse proven capabilities instead of regenerating solutions from scratch.
+Original decision: reusable executable assets are discoverable/versioned and selected from evidence rather than regenerated from scratch.
 
-## Decision
-The system SHALL maintain discoverable registries for Primitives and Flows. Metadata SHOULD include identity/version, task family/capabilities, schemas, dependencies, applicability, status and observed quality/reliability/latency/cost metrics. Retrieval prefers exact stable Flow, adaptable stable Flow, then Primitives before new code.
-
-## Consequences
-- Reduces repeated reasoning/development and enables evidence-based selection.
-- Requires indexing and metadata maintenance.
-
-## Invariants
-- Registry entries point to versioned executable definitions in Git.
-- Production metrics do not overwrite source definitions.
-
-## Revisit triggers
-- Registry maintenance cost exceeds measured reuse gain.
+Consolidated with the asset-type separation decision in ADR-0020. See Git history for the original full ADR.

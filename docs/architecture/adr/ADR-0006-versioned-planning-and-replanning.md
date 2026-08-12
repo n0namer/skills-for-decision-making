@@ -1,21 +1,9 @@
 # ADR-0006: Versioned Planning and Replanning
 
-- Status: **Accepted**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0019**
 
-## Context
-Plans must change when observations invalidate assumptions, but silent rewrites destroy auditability and can repeat work.
+Original decision: plans are structured/versioned and material changes occur through evidence-backed typed replanning, preferably PlanPatch.
 
-## Decision
-Plans SHALL be structured, versioned data. Material changes SHALL use an evidence-backed replan decision and preferably a PlanPatch. Allowed outcomes are CONTINUE, RETRY, PATCH_PLAN, REBUILD_PLAN, BACKTRACK, ESCALATE and FINISH. Replan reasons SHALL be typed.
-
-## Consequences
-- Preserves history and enables selective invalidation.
-- Requires plan/state persistence.
-
-## Invariants
-- Every replan cites evidence and reason.
-- Completed results are invalidated only through explicit dependency/evidence logic.
-
-## Revisit triggers
-- Patch semantics prove more complex than safe full rebuilds for most tasks.
+Consolidated with controller authority in ADR-0019. See Git history for the original full ADR.

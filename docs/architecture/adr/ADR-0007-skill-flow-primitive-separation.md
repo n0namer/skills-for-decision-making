@@ -1,21 +1,9 @@
 # ADR-0007: Skill / Flow / Primitive Separation
 
-- Status: **Accepted**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0020**
 
-## Context
-Skills provide flexible knowledge but long prose workflows are unreliable; executable flows need reuse; atomic actions need stable contracts.
+Original decision: Skill = adaptive knowledge, Flow = reusable executable strategy, Primitive = atomic executable capability.
 
-## Decision
-The architecture SHALL distinguish: Skill = adaptive knowledge/discovery guidance; Flow = reusable executable strategy; Primitive = atomic executable capability. Stable repeated control flow SHOULD migrate from prose into tested Flow code. Skills may reference flows/primitives and include bounded helper scripts.
-
-## Consequences
-- Combines early flexibility with later determinism.
-- Requires discipline to prevent drift between guidance and executable behavior.
-
-## Invariants
-- A long SKILL.md is not considered a tested workflow.
-- Critical branching/retry logic belongs in executable assets when practical.
-
-## Revisit triggers
-- A simpler representation retains equivalent flexibility, testing and reuse.
+Consolidated with the registry/retrieval contract in ADR-0020. See Git history for the original full ADR.

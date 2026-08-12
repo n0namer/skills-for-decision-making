@@ -1,20 +1,9 @@
 # ADR-0012: Continuous System Learning
 
-- Status: **Accepted**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0023**
 
-## Context
-The system should improve from repeated tasks without relying on model-weight updates or vague textual memory.
+Original decision: repeated evidence improves skills/flows/primitives/evals rather than relying only on textual reflection.
 
-## Decision
-Learning SHALL update reusable assets based on evidence: repeated success may create/promote a Flow or Primitive; repeated strategic lessons may update a Skill/routing rule; failures may update verifier logic and regression Evals. Runtime facts remain separate from system-level learning.
-
-## Consequences
-- Future tasks become cheaper and more reliable.
-- Generalization criteria are required.
-
-## Invariants
-- Learning changes executable behavior only through the controlled promotion lifecycle.
-
-## Revisit triggers
-- Automated learning produces more regressions than reuse gains.
+Consolidated with controlled self-modification in ADR-0023. See Git history for the original full ADR.

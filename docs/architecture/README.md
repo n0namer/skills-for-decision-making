@@ -1,56 +1,38 @@
 # Adaptive Problem Solver architecture
 
-The general user-facing entry point is `adaptive-problem-solver/SKILL.md`. Codex/Claude Code acts as meta-orchestrator, while `lib/problem-solver/` enforces deterministic task/plan/replan invariants. The older `decision-orchestrator` remains a specialist subsystem for formal decision analysis.
+The general user-facing entry point is `adaptive-problem-solver/SKILL.md`. Codex/Claude Code acts as meta-orchestrator. Deterministic code owns state transitions and replanning. `decision-orchestrator` is a specialist subsystem for formal decision analysis.
 
-## Runtime shape
+## Active architecture
 
 ```text
 Task
- -> Root Skill
- -> Coding Agent
- -> Task Controller
-    -> Frame / Model / Retrieve / Plan / Plan Judge
-    -> Execute bounded step
-    -> Verify / Update
-    -> Replan Gate
- -> Flow / Primitive / Skill / Eval registries
- -> Workflow runtime + connectors
- -> External systems
- -> Learn / promote tested reusable assets
+ -> Root Skill + Coding Agent
+ -> complexity route / adaptive lifecycle
+ -> deterministic Plan + TaskState controller
+ -> retrieve Skills / Flows / Primitives
+ -> execute bounded step
+ -> verify / evaluate
+ -> update state
+ -> continue / retry / patch / rebuild / backtrack / escalate / finish
+ -> learn through tested reusable assets
 ```
 
-## Implemented v1 control-plane pieces
-
-- structured Task/Plan/TaskState/PlanPatch/Replan contracts;
-- dependency/DAG validation;
-- smallest-sufficient L0/L1/L2/L3 routing from structured signals;
-- next-ready-step selection;
-- deterministic retry/replan transition decisions;
-- versioned PlanPatch with selective + transitive invalidation;
-- Flow/Primitive/Eval Git registries;
-- quality/reliability/SLA gates before cost-based flow selection;
-- `sdm-solve` CLI for coding agents;
-- tests for controller/replanning/registry invariants.
-
-Agno and connector ecosystems remain experimental and are not dependencies of the controller.
-
-## Decision map
+## Active ADR set
 
 | ADR | Decision | Status |
 |---|---|---|
-| 0001 | Root Skill as Single Entry Point | Accepted |
-| 0002 | Coding Agent as Meta-Orchestrator | Accepted |
-| 0003 | Adaptive Problem-Solving Lifecycle | Accepted |
-| 0004 | Deterministic Task Controller | Accepted |
-| 0005 | Task Complexity Routing | Accepted |
-| 0006 | Versioned Planning and Replanning | Accepted |
-| 0007 | Skill / Flow / Primitive Separation | Accepted |
-| 0008 | Primitive and Flow Registries | Accepted |
-| 0009 | Eval Registry and Reliability Lifecycle | Accepted |
-| 0010 | Verification and Judge Cascade | Accepted |
-| 0011 | Quality → Reliability → SLA → Cost | Accepted |
-| 0012 | Continuous System Learning | Accepted |
-| 0013 | Agno as Business Workflow Runtime | Experimental |
-| 0014 | Connector Strategy | Experimental |
-| 0015 | Git + Postgres Persistence Split | Accepted |
-| 0016 | Controlled Self-Modification | Accepted |
+| 0017 | Root Skill + Coding Agent Execution Model | Accepted |
+| 0018 | Adaptive Solver Lifecycle + Complexity Routing | Accepted |
+| 0019 | Deterministic Planning and Replanning | Accepted |
+| 0020 | Reusable Asset Model and Retrieval | Accepted |
+| 0021 | Verification, Eval and Promotion Lifecycle | Accepted |
+| 0022 | Quality → Reliability → SLA → Cost | Accepted |
+| 0023 | Learning and Controlled Self-Modification | Accepted |
+| 0024 | Persistence and Provenance | Accepted |
+| 0025 | Workflow Runtime and Connector Boundary | Experimental |
+
+ADR-0001…ADR-0016 are historical records superseded by the consolidated set above.
+
+## Why this refactor
+
+The original 16 ADRs had several overlapping decisions: root-skill and meta-orchestrator; lifecycle and complexity routing; controller and replanning; asset separation and registries; evals and verification; learning and self-modification; Agno and connector strategy. The active set keeps these concerns together where they form one architectural boundary, while keeping technology choices separate from durable solver policy.

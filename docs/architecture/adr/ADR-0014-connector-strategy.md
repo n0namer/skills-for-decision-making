@@ -1,21 +1,9 @@
 # ADR-0014: Connector Strategy
 
-- Status: **Experimental**
+- Status: **Superseded**
 - Date: 2026-08-12
+- Superseded by: **ADR-0025**
 
-## Context
-Office/business automation depends on broad reliable access to external systems. Writing every connector would dominate implementation time.
+Original decision: reuse reliable native/MCP/connector/API capabilities before custom integration, with browser automation last.
 
-## Decision
-Connector selection SHALL prefer existing reliable capability before custom code: native framework/toolkit → MCP → external connector ecosystem such as Composio → official API/SDK → custom integration → browser automation as last resort. External capabilities are staged/inspected before trusted use.
-
-## Consequences
-- Maximizes ecosystem reuse.
-- Vendor/MCP quality and security vary.
-
-## Invariants
-- Credentials and tenant context must not leak across connectors.
-- High-risk writes require explicit policy/approval.
-
-## Revisit triggers
-- A connector layer is too unreliable, expensive or unable to satisfy tenant/security requirements.
+Consolidated with runtime replaceability in ADR-0025. See Git history for the original full ADR.
