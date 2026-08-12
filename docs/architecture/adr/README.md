@@ -1,30 +1,21 @@
 # Architecture Decision Records
 
-ADRs capture durable architectural choices for the Adaptive Problem Solver.
+ADRs capture durable architectural choices for the Adaptive Problem Solver. `../README.md` is the canonical master schema; active ADRs explain the boundaries and invariants behind it.
 
-## Statuses
+Statuses: **Proposed**, **Experimental**, **Accepted**, **Deprecated**, **Superseded**, **Rejected**.
 
-- **Proposed** — under discussion.
-- **Experimental** — adopted for a bounded spike/pilot, not yet a durable dependency.
-- **Accepted** — current architectural contract.
-- **Deprecated** — still present but should not be used for new work.
-- **Superseded** — replaced by a newer ADR; Git history preserves the original record.
-- **Rejected** — considered and intentionally not adopted.
+## Active ADRs
 
-## Refactoring rule
+- ADR-0017 — Root Skill and Coding Agent Execution Model
+- ADR-0018 — Adaptive Solver Lifecycle and Complexity Routing
+- ADR-0019 — Deterministic Planning and Replanning
+- ADR-0020 — Reusable Asset Model and Retrieval
+- ADR-0021 — Verification, Eval and Promotion Lifecycle
+- ADR-0022 — Quality → Reliability → SLA → Cost and Solver Telemetry
+- ADR-0023 — Learning and Controlled Self-Modification
+- ADR-0024 — Persistence and Provenance
+- ADR-0025 — Workflow Runtime and Connector Boundary
 
-An ADR should answer one durable question. If several ADRs become inseparable or duplicate the same boundary, create a new consolidated ADR and mark the older records `Superseded`; do not silently rewrite architectural history.
+ADR-0001…ADR-0016 remain as historical `Superseded` records.
 
-The active ADR set is intentionally small and orthogonal:
-
-1. entrypoint/orchestrator responsibility;
-2. adaptive solving lifecycle;
-3. deterministic planning/replanning;
-4. reusable asset model;
-5. verification/evals/promotion;
-6. optimization objective;
-7. learning/self-modification;
-8. persistence/provenance;
-9. workflow-runtime/connector boundary.
-
-Implementation details such as filenames, exact database tables, framework-specific APIs and function names are not ADRs unless they become architectural contracts.
+Create a new ADR only for a genuinely new architectural boundary or an incompatible decision. Clarifications that preserve the same boundary should update the active ADR and record `Last reviewed` rather than proliferating documents.
