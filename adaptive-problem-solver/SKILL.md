@@ -51,6 +51,10 @@ sdm-solve registry
 sdm-solve validate-plan --plan plan.json
 sdm-solve init-state --task task.json --plan plan.json
 sdm-solve next-step --plan plan.json --state task-state.json
+sdm-solve begin-step --plan plan.json --state task-state.json --step <id>
+sdm-solve record-outcome --plan plan.json --state task-state.json --step <id> --outcome outcome.json
+sdm-solve record-observation --state task-state.json --observation observation.json
+sdm-solve select-flow --query flow-query.json
 sdm-solve decide --plan plan.json --state task-state.json --step <id> --verdict verdict.json
 sdm-solve apply-patch --plan plan.json --state task-state.json --patch patch.json
 ```
