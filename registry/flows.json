@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "flows": [
+    {
+      "id": "decision-orchestration",
+      "version": 1,
+      "status": "candidate",
+      "taskFamily": "decision-analysis",
+      "capabilities": ["decision-routing", "decision-analysis", "pipeline-execution"],
+      "entrypoint": "lib/problem-solver/adapters/decision-flow.js#runDecisionFlow",
+      "skill": "decision-orchestrator",
+      "metrics": {}
+    }
+  ]
+}
