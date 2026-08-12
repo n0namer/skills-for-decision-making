@@ -1,10 +1,12 @@
 # Extended Decision Engine Architecture
 
+This document describes the **decision-analysis subsystem**. It is no longer the global root architecture. General tasks enter through `adaptive-problem-solver`; when a task requires formal decision analysis, that root skill may invoke `decision-orchestrator` or the registered `decision-orchestration` flow.
+
 ## North star
 
 Turn an ambiguous real-world decision into a reproducible analysis where:
 
-1. the user invokes one entrypoint: `decision-orchestrator`;
+1. the decision-analysis subsystem has one internal entrypoint: `decision-orchestrator`;
 2. the agent frames the decision and gathers evidence;
 3. every important numeric input has provenance;
 4. deterministic or reproducible code performs calculations;
@@ -16,15 +18,15 @@ Turn an ambiguous real-world decision into a reproducible analysis where:
 
 **LLM for semantics and skill execution; code for routing, execution control, arithmetic and algorithms.**
 
-The LLM may propose alternatives, identify uncertainties, search for evidence, apply the selected skill instructions, and explain results. It must not silently replace a supported calculator, choose an arbitrary skill chain, or choose an arbitrary mathematical method.
+The LLM may propose alternatives, identify uncertainties, search for evidence, apply selected skill instructions, and explain results. It must not silently replace a supported calculator, choose an arbitrary skill chain, or choose an arbitrary mathematical method.
 
 ## End-to-end data flow
 
 ```text
-user problem
+adaptive-problem-solver or direct decision request
    |
    v
-decision-orchestrator                    <- single user-facing skill
+decision-orchestrator                  <- decision-subsystem entrypoint
    |
    +--> intent signals
    +--> relevant .agents/context
@@ -33,10 +35,10 @@ decision-orchestrator                    <- single user-facing skill
 deterministic skill router
    |
    v
-PipelinePlanner                          <- minimal ordered pipeline + dependencies
+PipelinePlanner                        <- minimal ordered pipeline + dependencies
    |
    v
-PipelineExecutor                         <- execution control / fail closed
+PipelineExecutor                       <- execution control / fail closed
    |
    +--> skill step -> materialized SKILL.md -> current agent applies instructions
    |
@@ -48,10 +50,16 @@ PipelineExecutor                         <- execution control / fail closed
 DecisionSpec / AnalysisResult / step outputs
    |
    v
-one synthesized user-facing answer
+one synthesized decision result
 ```
 
-`plan` is diagnostic output. It is not completion. Normal agent execution materializes a `bundle` and processes every selected step before answering.
+`plan` is diagnostic output. It is not completion. Normal execution materializes a `bundle` and processes every selected step before answering.
+
+## General-solver adapter boundary
+
+The general Adaptive Problem Solver reaches this subsystem through `lib/problem-solver/adapters/decision-flow.js`. The Flow Registry records that adapter as `decision-orchestration` with `candidate` status until generic flow-level quality/reliability/SLA metrics are established.
+
+The decision subsystem must not own global Task/Plan/PlanPatch state or global replanning authority.
 
 ## Executor boundary
 
@@ -64,9 +72,7 @@ It owns the parts that must be deterministic across agent runtimes:
 - preserve planner order and dependencies;
 - pass prior step outputs into later steps;
 - stop immediately when a required step fails;
-- expose an injectable `runSkill` / `runMethod` boundary for the host agent runtime.
-
-The host AI agent that invoked `decision-orchestrator` is the normal `runSkill` implementation. This keeps the system portable while still giving it one orchestration entrypoint.
+- expose injectable `runSkill` / `runMethod` boundaries for the host agent runtime.
 
 Programmatic integrations may call `executeOrchestration({ runSkill, runMethod, ... })`. Agent runtimes normally use:
 
@@ -128,17 +134,11 @@ engine/
     optimization/
 ```
 
-Each adapter should accept a normalized subset of `DecisionSpec` and return JSON-serializable results with:
-
-- method and implementation name/version;
-- normalized inputs;
-- result/ranking;
-- warnings;
-- reproducibility metadata such as random seed when applicable.
+Each adapter should accept a normalized subset of `DecisionSpec` and return JSON-serializable results with method/implementation version, normalized inputs, result/ranking, warnings, and reproducibility metadata such as random seed when applicable.
 
 ## Guardrails
 
-1. The user should not need to choose an internal decision skill; `decision-orchestrator` is the single entrypoint.
+1. Users should not need to choose an internal decision skill; `decision-orchestrator` is the subsystem entrypoint, while `adaptive-problem-solver` is the general entrypoint.
 2. A routing/plan response is not task completion. Every selected step must be applied or the system must expose a blocker.
 3. Same structured inputs must produce the same deterministic method result.
 4. Stochastic methods must accept/report a seed when practical.
