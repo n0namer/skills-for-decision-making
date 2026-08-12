@@ -24,6 +24,10 @@
     "{model}"
   ],
   "skills": {
+    "adaptive-problem-solver": {
+      "tools": "Read,Bash",
+      "baselinePrompt": "You are a coding-capable assistant solving a business or operational task. Answer the following without being given a predefined problem-solving framework."
+    },
     "decision-orchestrator": {
       "tools": "Read,Bash",
       "baselinePrompt": "You are advising the founder of a small software business. Answer the following without asking the user to choose an internal framework or skill."

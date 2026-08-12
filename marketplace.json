@@ -7,6 +7,12 @@
   "source": "Kochenderfer, Wheeler & Wray, Algorithms for Decision Making (MIT Press, 2022)",
   "skills": [
     {
+      "slug": "adaptive-problem-solver",
+      "name": "Adaptive Problem Solver",
+      "path": "adaptive-problem-solver/SKILL.md",
+      "description": "Root skill for adaptive problem solving across business, research, operations, coding and other open-ended tasks. Routes simple work directly, reuses tested flows/primitives, plans and verifies non-trivial work, replans on new evidence, and turns repeated successful behavior or failures into reusable flows, primitives and evals."
+    },
+    {
       "slug": "decision-orchestrator",
       "name": "Decision Orchestrator",
       "path": "decision-orchestrator/SKILL.md",
