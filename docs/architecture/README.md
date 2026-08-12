@@ -1,8 +1,6 @@
 # Adaptive Problem Solver architecture
 
-This directory records the architecture for the repository's general-purpose adaptive problem-solving layer.
-
-The user-facing entry point is `adaptive-problem-solver/SKILL.md`. The host coding agent (Codex, Claude Code or equivalent) acts as the meta-orchestrator. Stable execution logic is progressively moved from natural-language guidance into tested flows and primitives.
+The general user-facing entry point is `adaptive-problem-solver/SKILL.md`. Codex/Claude Code acts as meta-orchestrator, while `lib/problem-solver/` enforces deterministic task/plan/replan invariants. The older `decision-orchestrator` remains a specialist subsystem for formal decision analysis.
 
 ## Runtime shape
 
@@ -20,6 +18,21 @@ Task
  -> External systems
  -> Learn / promote tested reusable assets
 ```
+
+## Implemented v1 control-plane pieces
+
+- structured Task/Plan/TaskState/PlanPatch/Replan contracts;
+- dependency/DAG validation;
+- smallest-sufficient L0/L1/L2/L3 routing from structured signals;
+- next-ready-step selection;
+- deterministic retry/replan transition decisions;
+- versioned PlanPatch with selective + transitive invalidation;
+- Flow/Primitive/Eval Git registries;
+- quality/reliability/SLA gates before cost-based flow selection;
+- `sdm-solve` CLI for coding agents;
+- tests for controller/replanning/registry invariants.
+
+Agno and connector ecosystems remain experimental and are not dependencies of the controller.
 
 ## Decision map
 
@@ -41,5 +54,3 @@ Task
 | 0014 | Connector Strategy | Experimental |
 | 0015 | Git + Postgres Persistence Split | Accepted |
 | 0016 | Controlled Self-Modification | Accepted |
-
-The ADRs are intentionally technology-light except where a choice is explicitly experimental. The solver architecture must remain valid if the workflow runtime, connector vendor or LLM provider changes.
