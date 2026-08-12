@@ -2,51 +2,58 @@
 
 ## Purpose
 
-Operational map for the root skill. Normative decisions live in `docs/architecture/adr/`.
+This reference gives the coding agent a compact map of the system. Normative decisions live in `docs/architecture/adr/`; this file is operational guidance for the root skill.
 
 ## Layers
 
 ```text
 User task
-  -> adaptive-problem-solver SKILL.md
-  -> Codex / Claude Code meta-orchestrator
-  -> deterministic controller (`lib/problem-solver/`)
-       -> TaskSpec / Plan / TaskState / PlanPatch contracts
-       -> next-ready-step / retry / replan gates
-       -> Flow / Primitive / Eval registry selection
+  -> adaptive-problem-solver skill
+  -> coding agent meta-orchestrator
+  -> deterministic Task Controller
+       -> Planner / Replanner / Verifiers
+       -> Skill retrieval
+       -> Flow Registry
+       -> Primitive Registry
+       -> Eval Registry
   -> business workflow runtime (experimental: Agno)
-  -> connectors/tools (native, MCP, connector ecosystem, APIs)
+  -> connectors/tools (native, MCP, external connector ecosystem, APIs)
   -> external systems
 ```
 
-## Executable components
+## Three reusable asset types
 
-- `lib/problem-solver/contracts.js` — Task/Plan/PlanPatch/Replan contracts and validation.
-- `lib/problem-solver/controller.js` — deterministic ready-step, outcome and replanning transitions.
-- `lib/problem-solver/mode-router.js` — structured L0/L1/L2/L3 mode selection.
-- `lib/problem-solver/asset-registry.js` — Flow/Primitive manifest loading and quality/reliability/SLA/cost filtering.
-- `scripts/problem-solver.js` (`sdm-solve`) — vendor-neutral CLI for host coding agents.
-- `registry/` — versioned asset manifests. Definitions live in Git; observed production metrics belong in operational storage.
+### Skill
+Knowledge and adaptation layer. It recognizes task classes, points to relevant flows/primitives/methods, records failure modes and tells the coding agent how to acquire missing capabilities.
 
-## Reusable assets
+### Flow
+Executable, reusable strategy. Stable control flow belongs in code, not only prose. A flow may call primitives, agents and nested flows.
 
-**Skill**: knowledge/adaptation/discovery layer.  
-**Flow**: executable reusable strategy.  
-**Primitive**: atomic executable capability.  
-**Eval**: evidence and regression constraints.
+### Primitive
+Atomic executable capability with typed inputs/outputs, side-effect/risk metadata and deterministic contract tests where possible.
 
-The current decision engine is integrated as a candidate flow through an adapter boundary; it is not the general controller.
+## Eval plane
 
-## Replanning
+Evals are first-class assets: deterministic tests, golden task cases, production regressions, semantic judges where needed and adversarial judges only when risk justifies their cost.
 
-The controller uses receding-horizon execution: execute a bounded step, verify, update state, then choose a typed transition. Structural plan changes increment `Plan.version` and use evidence-backed `PlanPatch` where possible. Touched steps and transitive dependents are reset; unaffected completed work remains valid.
+A production failure should become an executable regression constraint when reproducible.
+
+## Planning and replanning
+
+For non-trivial tasks the controller maintains a versioned Plan. Execution is receding-horizon: execute a bounded step, observe, verify, update state, then decide whether to continue or replan.
 
 Global actions: `CONTINUE`, `RETRY`, `PATCH_PLAN`, `REBUILD_PLAN`, `BACKTRACK`, `ESCALATE`, `FINISH`.
 
-## Storage boundary
+Prefer PlanPatch to full rebuild. Every replan requires typed reason + evidence.
 
-Git is source of truth for skill/flow/primitive/eval definitions, policies and ADRs. Postgres remains the intended operational store for task state, plan versions, runs, observations, judge results, cost/latency and lessons. The database schema is intentionally not fixed yet.
+## Storage
+
+Git is the source of truth for skills, flows, primitives, eval definitions, policies and ADRs. Postgres is the intended operational store for tasks/state, plan versions, runs, observations, judge results, costs/latency and lessons.
+
+The concrete Postgres schema is an implementation detail until runtime work begins.
 
 ## Runtime boundary
 
-Agno is experimental for business workflows and integrations. No core Task/Plan/Replan schema may depend on Agno concepts. The architecture must survive replacing Agno, any connector vendor, and any specific LLM provider.
+Agno is an experimental business-workflow runtime, not the global solver brain. The deterministic Task Controller must remain replaceable and should not depend on Agno-specific semantics.
+
+The root skill and controller architecture must survive replacing Agno, a connector vendor or any specific LLM provider.

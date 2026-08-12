@@ -41,10 +41,6 @@ run "belief"      node scripts/calc.js belief examples/belief.json
 run "track"       node scripts/calc.js track examples/track.json
 run "json output" node scripts/calc.js voi examples/voi.json --json
 
-echo "adaptive solver CLI smoke test"
-run "solve help"      node scripts/problem-solver.js --help
-run "solve registry"  node scripts/problem-solver.js registry
-
 # Unknown commands and missing files must fail loudly, not silently succeed.
 if node scripts/calc.js nonsense >/dev/null 2>&1; then
   echo "  FAIL unknown command should exit non-zero"; fail=1

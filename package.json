@@ -1,14 +1,13 @@
 {
   "name": "skills-for-decision-making",
   "version": "1.0.0",
-  "description": "Decision-making skills plus an adaptive problem-solving control layer for coding agents",
+  "description": "Decision-making skills for AI agents, built on Algorithms for Decision Making",
   "type": "module",
   "license": "MIT",
   "bin": {
     "sdm": "scripts/calc.js",
     "sdm-decision": "scripts/decision.js",
     "sdm-orchestrate": "scripts/orchestrate.js",
-    "sdm-solve": "scripts/problem-solver.js",
     "sdm-context-init": "scripts/init-context.js",
     "sdm-skills": "scripts/skills.js",
     "sdm-skills-install": "scripts/install-skills.js"
@@ -18,7 +17,6 @@
     "scripts/",
     "examples/",
     "engine/",
-    "registry/",
     ".agents/context/*.example.*",
     "adaptive-problem-solver/",
     "decision-orchestrator/",

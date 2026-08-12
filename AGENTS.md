@@ -28,15 +28,12 @@ If the same user request says both **update the skills** and **run/use a skill a
 After sync:
 
 1. Resolve the new source revision from lifecycle status/lock.
-2. Explicitly re-read the requested entry skill from the **new** resolved checkout/installed target:
-   - `adaptive-problem-solver/SKILL.md` for general problem solving;
-   - `decision-orchestrator/SKILL.md` for decision-analysis-only work.
-3. Execute orchestration/controller code from that same revision.
+2. Explicitly re-read the requested entry skill (`decision-orchestrator/SKILL.md` when applicable) from the new resolved checkout/installed target.
+3. Execute orchestration code from that same revision.
 4. For `decision-orchestrator`, use `bundle`, not `plan`, for normal execution.
-5. For `adaptive-problem-solver`, use `sdm-solve`/`lib/problem-solver/` invariants for L2/L3 plan/replan operations rather than reproducing controller logic from memory.
-6. Verify runtime/source revisions match when the invoked CLI exposes revision metadata.
-7. Do not read an older cache checkout merely because its path was previously known.
-8. If revisions differ, stop and reload the new revision before doing user work.
+5. Verify `bundle.runtime.revision` equals the newly installed source revision.
+6. Do not read an older cache checkout merely because its path was previously known.
+7. If the revisions differ, stop and reload the new revision before doing user work.
 
 A successful `sync` plus `status: current` proves filesystem state, not that the host agent hot-reloaded an already cached skill definition.
 
@@ -44,7 +41,7 @@ Preferred lifecycle commands from a cache/bootstrap checkout:
 
 ```text
 node <cache>/scripts/skills.js status --scope project --project-root <user-project>
-node <cache>/scripts/skills.js sync --target agents --scope project --project-root <user-project> --mode auto
+node <cache>/scripts/skills.js sync --target <existing-profile> --scope project --project-root <user-project> --mode auto
 node <cache>/scripts/skills.js status --scope project --project-root <user-project>
 ```
 
