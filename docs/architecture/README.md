@@ -6,7 +6,7 @@ This file is the **canonical architecture view set**. Active ADRs define why eac
 
 ## North Star
 
-**Tenant-specific context stays inside its Tenant boundary, while generalized useful experience has a controlled path to become shared system capability.**
+**Tenant-specific context stays inside its Tenant boundary, while multiple Solver Instances can reuse the same reviewed Global capabilities and generalized useful experience has a controlled path to become shared system capability.**
 
 Canonical logical scope:
 
@@ -16,15 +16,15 @@ Canonical logical scope:
 - **Workspace** — hierarchical context boundary; may represent a project, business area, research topic or personal domain.
 - **Task** — durable unit of work.
 - **Run** — execution attempt or continuation.
-- Runtime topology does not change this hierarchy.
+- Solver Instance is deployment topology, not a level in this hierarchy.
 
 ## C4 view discipline
 
 - **C1 System Context:** solver plus external actors/systems.
-- **C2 Container:** major runtime and data-store boundaries.
+- **C2 Container:** actual major runtime and data-store boundaries; do not invent services for logical libraries.
 - **Dynamic:** scoped context assembly, planning, execution, verification and replanning.
 - **Learning:** local reusable assets and controlled Global promotion.
-- **Deployment:** physical mappings of the same logical scope model.
+- **Deployment:** physical mappings of the same logical scope model and versioned Global asset distribution.
 - **Policy:** quality/reliability/SLA/cost selection and telemetry.
 
 Tenant and Workspace are domain scopes, not C4 containers. A canonical C3 diagram remains deferred until component boundaries exist in code; ADR-0026/0027 define the target component responsibilities meanwhile.
@@ -54,10 +54,9 @@ flowchart TB
     subgraph APS["Adaptive Problem Solver"]
         HOST["Container: Agent Host\nRoot Skill + agent runtime"]
         CTRL["Container: Solver Control Plane\nTask Controller / Planner / Replanner / Verifier\nScope resolution + context policy"]
-        ASSETS["Container: Reusable Asset Layer\nGlobal + scoped Skills / Flows / Primitives / Evals"]
         RUNTIME["Container: Workflow Runtime Adapter"]
         CONNECT["Container: Connector Adapter Layer"]
-        GIT[("Data Store: Git\nversioned definitions / ADRs / policies")]
+        GIT[("Data Store: Git\nGlobal reusable definitions / ADRs / policies")]
         DB[("Data Store: Operational DB\nscoped task state / plans / evidence / telemetry")]
         MEM[("Data Store: Scoped Memory / Retrieval\nTenant / Workspace / Task knowledge")]
     end
@@ -65,9 +64,8 @@ flowchart TB
     EXT["External business systems"]
 
     HOST --> CTRL
-    CTRL -->|"resolve allowed assets"| ASSETS
+    CTRL -->|"resolve allowed exact-version assets"| GIT
     CTRL -->|"retrieve inside resolved scope"| MEM
-    ASSETS --> GIT
     CTRL -->|"scope, state, provenance, observations"| DB
     GIT -.->|"exact revision references"| DB
     CTRL -->|"bounded flow + resolved scope"| RUNTIME
@@ -75,7 +73,7 @@ flowchart TB
     CONNECT --> EXT
 ```
 
-The Context Builder is currently a **Control Plane responsibility**, not a separate C2 container. Split it only when independent deployment/scaling needs justify a real container boundary.
+The **Reusable Asset Layer is a logical library/resolution responsibility, not a separate network service in the MVP**. Global Skills/Flows/Primitives/Evals come from an exact Git revision/tag/bundle and may be checked out or cached with the Solver deployment. Likewise, the Context Builder remains a Control Plane responsibility. Split either only when an independent deployment/scaling need becomes real.
 
 Primary ADR coverage: **ADR-0017, ADR-0019, ADR-0020, ADR-0024, ADR-0025, ADR-0026, ADR-0027**.
 
@@ -152,14 +150,15 @@ flowchart LR
     LOCALOK -->|"yes"| LSTABLE["Stable Local Asset"]
 
     LSTABLE --> GENERAL["Generalize\nRemove local-only dependencies"]
-    GENERAL --> GEVAL["Representative Evals"]
+    GENERAL --> PR["PR: Global candidate"]
+    PR --> GEVAL["Review + Representative Evals"]
     GEVAL --> GLOBALOK{"Pass Global gates?"}
     GLOBALOK -->|"no"| LSTABLE
-    GLOBALOK -->|"yes"| GSTABLE["Global Reusable Asset"]
-    GSTABLE --> GIT[("Git: exact version / provenance")]
+    GLOBALOK -->|"yes"| MERGE["Merge"]
+    MERGE --> GSTABLE["New Global Git revision / tag"]
 ```
 
-Local stability and Global visibility are separate decisions. Raw scoped memory has no direct Global promotion path.
+For the MVP, the promotion mechanism is deliberately ordinary Git workflow: **candidate change → PR → review/tests/evals → merge → new Global revision**. No Promotion Service is required. Local stability and Global visibility remain separate decisions, and raw scoped memory has no direct Global promotion path.
 
 Primary ADR coverage: **ADR-0020, ADR-0021, ADR-0023, ADR-0024, ADR-0026, ADR-0027**.
 
@@ -200,15 +199,30 @@ Primary ADR coverage: **ADR-0021, ADR-0022, ADR-0023**.
 
 ```mermaid
 flowchart TB
-    TENANT["Logical Tenant\nWorkspace → Task → Run"] --> PROFILE{"Runtime topology"}
-    PROFILE --> SHARED["Deployment Node: Shared Solver Cluster\nShared Host + Control Plane + Runtime\nTenant-aware data partitions"]
-    PROFILE --> DEDICATED["Deployment Node: Dedicated Runtime\nSeparate runtime capacity for one Tenant"]
-    PROFILE --> SEPARATE["Deployment Node: Separate Tenant Stack\nRuntime + operational persistence + retrieval/storage"]
+    GIT[("Shared Git Source of Truth\nGlobal Skill / Flow / Primitive / Eval revisions")]
+
+    I1["Deployment Node: Solver Instance 1\npinned Global assets: vX"]
+    I2["Deployment Node: Solver Instance 2\npinned Global assets: vX"]
+    I3["Deployment Node: Solver Instance 3\npinned Global assets: vY canary"]
+
+    D1[("Scoped data\nTenant A / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
+    D2[("Scoped data\nTenant B / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
+    D3[("Scoped data\nTenant C / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
+
+    GIT -.->|"checkout / deploy exact revision"| I1
+    GIT -.->|"checkout / deploy exact revision"| I2
+    GIT -.->|"checkout / deploy exact revision"| I3
+
+    I1 --> D1
+    I2 --> D2
+    I3 --> D3
 ```
 
-A runtime instance is infrastructure, not a hierarchy level. Tenant scope remains explicit in every topology.
+The Git arrows represent **versioned distribution, not synchronous runtime registry calls**. Sharing the same Global Flow/Skill/Primitive/Eval revision does not create a path between Tenant data stores. Instance placement/version selection may initially be ordinary deployment configuration or environment variables; no Fleet Manager or Deployment Registry service is required.
 
-Primary ADR coverage: **ADR-0026, ADR-0028**.
+The same logical Tenant/Workspace/Task/Run contracts also support a shared multi-tenant instance or a fully isolated tenant stack later. A runtime instance remains infrastructure, not a hierarchy level.
+
+Primary ADR coverage: **ADR-0020, ADR-0024, ADR-0026, ADR-0028**.
 
 ## ADR → Architecture View Traceability
 
@@ -217,11 +231,11 @@ Primary ADR coverage: **ADR-0026, ADR-0028**.
 | 0017 Root Skill + Coding Agent | ✅ | ✅ |  |  |  |  |  |
 | 0018 Lifecycle + Complexity Routing |  |  | ✅ |  |  |  |  |
 | 0019 Deterministic Planning + Replanning |  | ✅ | ✅ |  |  |  |  |
-| 0020 Reusable Asset Model + Retrieval |  | ✅ | ✅ | ✅ |  |  |  |
+| 0020 Reusable Asset Model + Retrieval |  | ✅ | ✅ | ✅ |  |  | ✅ |
 | 0021 Verification / Eval / Promotion |  |  | ✅ | ✅ |  | ✅ |  |
 | 0022 Quality → Reliability → SLA → Cost |  |  | ✅ |  |  | ✅ |  |
 | 0023 Learning + Controlled Self-Modification |  |  |  | ✅ |  | ✅ |  |
-| 0024 Persistence + Provenance |  | ✅ |  | ✅ | ✅ |  |  |
+| 0024 Persistence + Provenance |  | ✅ |  | ✅ | ✅ |  | ✅ |
 | 0025 Runtime + Connector Boundary | ✅ | ✅ |  |  | ✅ |  |  |
 | 0026 Scope Hierarchy + Tenant Isolation | ✅ | ✅ | ✅ | ✅ | ✅ |  | ✅ |
 | 0027 Context Assembly + Memory Scoping | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |
