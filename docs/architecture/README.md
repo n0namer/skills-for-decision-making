@@ -1,117 +1,83 @@
 # Adaptive Problem Solver architecture
 
-The general user-facing entry point is `adaptive-problem-solver/SKILL.md`. The agent host acts as the meta-orchestrator. Deterministic policies own critical task-state transitions, plan mutation, verification gates, scope resolution and promotion.
+The general user-facing entry point is `adaptive-problem-solver/SKILL.md`. Codex/Claude Code acts as the meta-orchestrator. Deterministic code/policies own critical task-state transitions, plan mutation, verification gates and promotion. `decision-orchestrator` is a specialist subsystem for formal decision analysis.
 
-This file is the **canonical architecture view set**. Active ADRs define why each boundary exists. Diagrams are projections of those decisions.
-
-## North Star
-
-**Tenant-specific context stays inside its Tenant boundary, while multiple Solver Instances can reuse the same reviewed Global capabilities and generalized useful experience has a controlled path to become shared system capability.**
-
-Canonical logical scope:
-
-`Global → Tenant → Workspace → Task → Run`
-
-- **Tenant** — hard ownership boundary.
-- **Workspace** — hierarchical context boundary; may represent a project, business area, research topic or personal domain.
-- **Task** — durable unit of work.
-- **Run** — execution attempt or continuation.
-- Solver Instance is deployment topology, not a level in this hierarchy.
+This file is the **canonical architecture view set**. Active ADRs define why each boundary exists. Mermaid diagrams are projections of those decisions; they do not replace the ADR text.
 
 ## C4 view discipline
 
-- **C1 System Context:** solver plus external actors/systems.
-- **C2 Container:** actual major runtime and data-store boundaries; do not invent services for logical libraries.
-- **Dynamic:** scoped context assembly, planning, execution, verification and replanning.
-- **Learning:** local reusable assets and controlled Global promotion.
-- **Deployment:** physical mappings of the same logical scope model and versioned Global asset distribution.
-- **Policy:** quality/reliability/SLA/cost selection and telemetry.
+We use C4 principles plus supplementary dynamic/policy views:
 
-Tenant and Workspace are domain scopes, not C4 containers. A canonical C3 diagram remains deferred until component boundaries exist in code; ADR-0026/0027 define the target component responsibilities meanwhile.
+- **System Context** shows the solver as one software system and its external actors/systems.
+- **Container** shows the major runtime/data-store boundaries inside the solver.
+- **Dynamic** shows how one task moves through planning, execution, verification and replanning.
+- **Asset/Learning** shows the lifecycle of reusable capabilities and controlled self-modification.
+- **Trust/Deployment** shows external capability acquisition, connector boundaries and security controls.
+- **Selection Policy** is a supplementary non-C4 policy view for quality/reliability/SLA/cost and telemetry.
+
+Do not mix implementation-level classes/functions into Context or Container views. Do not encode rationale in diagrams; rationale remains in ADRs. A Component view is intentionally deferred until the control-plane implementation is stable enough that component boundaries are real rather than speculative.
 
 ## View 1 — C4 System Context
 
 ```mermaid
 flowchart LR
     USER["Person: User / Operator"]
-    APS["Software System: Adaptive Problem Solver\nMulti-tenant, workspace-scoped"]
+    APS["Software System: Adaptive Problem Solver"]
     BIZ["External Systems: Business apps and data sources"]
-    CAPS["External Capability Sources"]
+    CAPS["External Capability Sources: MCP, skill repositories, APIs"]
 
     USER -->|"task, goal, constraints"| APS
-    APS -->|"read / act through adapters"| BIZ
+    APS -->|"read / act through governed adapters"| BIZ
     APS -->|"discover candidate capabilities"| CAPS
 ```
 
-Tenant/Workspace boundaries are internal properties of APS, not additional C1 systems.
-
-Primary ADR coverage: **ADR-0017, ADR-0025, ADR-0026, ADR-0027**.
+Primary ADR coverage: **ADR-0017, ADR-0025**.
 
 ## View 2 — C4 Container View
 
 ```mermaid
 flowchart TB
     subgraph APS["Adaptive Problem Solver"]
-        HOST["Container: Agent Host\nRoot Skill + agent runtime"]
-        CTRL["Container: Solver Control Plane\nTask Controller / Planner / Replanner / Verifier\nScope resolution + context policy"]
-        RUNTIME["Container: Workflow Runtime Adapter"]
-        CONNECT["Container: Connector Adapter Layer"]
-        GIT[("Data Store: Git\nGlobal reusable definitions / ADRs / policies")]
-        DB[("Data Store: Operational DB\nscoped task state / plans / evidence / telemetry")]
-        MEM[("Data Store: Scoped Memory / Retrieval\nTenant / Workspace / Task knowledge")]
+        HOST["Container: Agent Host\nCodex / Claude + Root Skill"]
+        CTRL["Container: Solver Control Plane\nTask Controller / Planner / Replanner / Verifier"]
+        ASSETS["Container: Reusable Asset Layer\nSkills incl. decision-orchestrator / Flows / Primitives / Evals"]
+        RUNTIME["Container: Workflow Runtime Adapter\nAgno hypothesis / replaceable runtime"]
+        CONNECT["Container: Connector Adapter Layer\nNative / MCP / connector ecosystem / API"]
+        GIT[("Data Store: Git\nversioned definitions / ADRs / policies")]
+        DB[("Data Store: Operational DB\ntask state / plans / evidence / telemetry")]
     end
 
     EXT["External business systems"]
 
-    HOST --> CTRL
-    CTRL -->|"resolve allowed exact-version assets"| GIT
-    CTRL -->|"retrieve inside resolved scope"| MEM
-    CTRL -->|"scope, state, provenance, observations"| DB
+    HOST -->|"interprets root skill; proposes plans / adaptations"| CTRL
+    CTRL -->|"retrieves / selects reusable assets"| ASSETS
+    ASSETS -->|"definitions and exact versions"| GIT
+    CTRL -->|"state, provenance, observations, metrics"| DB
     GIT -.->|"exact revision references"| DB
-    CTRL -->|"bounded flow + resolved scope"| RUNTIME
-    RUNTIME --> CONNECT
-    CONNECT --> EXT
+    CTRL -->|"executes bounded flows"| RUNTIME
+    RUNTIME -->|"invokes capabilities through"| CONNECT
+    CONNECT -->|"read / write"| EXT
 ```
 
-The **Reusable Asset Layer is a logical library/resolution responsibility, not a separate network service in the MVP**. Global Skills/Flows/Primitives/Evals come from an exact Git revision/tag/bundle and may be checked out or cached with the Solver deployment. Likewise, the Context Builder remains a Control Plane responsibility. Split either only when an independent deployment/scaling need becomes real.
-
-Primary ADR coverage: **ADR-0017, ADR-0019, ADR-0020, ADR-0024, ADR-0025, ADR-0026, ADR-0027**.
-
-## C3 status — contracts before boxes
-
-Expected responsibilities once component boundaries stabilize:
-
-| Responsibility | Contract |
-|---|---|
-| Scope Resolver | Resolve one Tenant plus applicable Workspace/Task/Run coordinates before retrieval or execution. |
-| Workspace Manager | Maintain same-Tenant workspace hierarchy and local configuration. |
-| Context Builder | Assemble effective context only from allowed sources and preserve provenance. |
-| Inheritance Resolver | Resolve Global → Tenant → Workspace ancestry → local overrides without copying definitions. |
-| Policy Evaluator | Enforce mandatory higher-level rules and invalid-scope rejection. |
-| Namespace Resolver | Map logical scope to the correct memory/retrieval partition. |
-| Memory Retriever/Writer | Read/write durable knowledge within resolved scope. |
-
-When these become stable modules/services, add the canonical C3 diagram and link boxes to implementation paths.
+Primary ADR coverage: **ADR-0017, ADR-0019, ADR-0020, ADR-0024, ADR-0025**.
 
 ## View 3 — Dynamic Runtime / Replanning View
 
 ```mermaid
 flowchart TD
-    T["Task / North Star / DoD"] --> SCOPE["Resolve Tenant / Workspace / Task / Run"]
-    SCOPE --> CTX["Build Effective Context\nGlobal allowed + Tenant + Workspace + Task + Run"]
-    CTX --> ROUTE{"Complexity Router"}
+    T["Task / North Star / DoD"] --> ROUTE{"Complexity Router"}
 
-    ROUTE -->|"L0"| L0["Direct Primitive / Tool"]
-    ROUTE -->|"L1"| L1["Stable Reusable Flow"]
+    ROUTE -->|"L0 Action"| L0["Execute Direct Primitive / Tool"]
+    ROUTE -->|"L1 Known Flow"| L1["Execute Stable Reusable Flow"]
     ROUTE -->|"L2 / L3"| MODEL["State / World Model"]
 
-    L0 --> VERIFY0["Lightweight Verification"]
-    L1 --> VERIFY0
-    VERIFY0 --> FAST{"DoD satisfied?"}
-    FAST -->|"yes"| DELIVERY["Delivery"]
-    FAST -->|"no"| MODEL
+    L0 --> QUICK["Lightweight Verification as Required"]
+    L1 --> QUICK
+    QUICK --> QUICKDONE{"DoD satisfied?"}
+    QUICKDONE -->|"yes"| DELIVERY["Delivery"]
+    QUICKDONE -->|"no / hidden complexity"| MODEL
 
-    MODEL --> RETRIEVE["Retrieve Allowed Skills / Flows / Primitives / Evals"]
+    MODEL --> RETRIEVE["Retrieve Skills / Flows / Primitives / Evals"]
     RETRIEVE --> META{"Meta-decision\nTHINK / OBSERVE / ACT"}
     META --> PLAN["Versioned Short-Horizon Plan"]
     PLAN --> PJ{"Plan Judge"}
@@ -119,66 +85,83 @@ flowchart TD
     PJ -->|"pass"| EXEC["Execute One Bounded Step"]
 
     EXEC --> OBS["Observation"]
-    OBS --> VERIFY["Verification Cascade"]
-    VERIFY --> UPDATE["Update Scoped World Model / Task State"]
-    UPDATE --> REPLAN{"Replan Gate"}
+    OBS --> PRED["Prediction vs Actual\nPrediction Error"]
+    PRED --> VERIFY["Verification Cascade\nExternal result -> deterministic -> source -> semantic -> adversarial -> reflection"]
+    VERIFY --> UPDATE["Update World Model / Task State"]
+    UPDATE --> GAIN{"Goal progress, information gain\nor risk reduction?"}
 
-    REPLAN -->|"continue / retry"| EXEC
+    GAIN -->|"yes"| REPLAN{"Replan Gate"}
+    GAIN -->|"no"| STRATEGY{"Change strategy, escalate or stop?"}
+    STRATEGY -->|"change strategy"| RETRIEVE
+    STRATEGY -->|"escalate"| ESC["Human / Approval / Blocker"]
+    STRATEGY -->|"stop"| STOP["Stop with reason / evidence"]
+
+    REPLAN -->|"continue"| EXEC
+    REPLAN -->|"retry"| EXEC
     REPLAN -->|"patch plan"| PLAN
     REPLAN -->|"rebuild / backtrack"| RETRIEVE
-    REPLAN -->|"escalate"| ESC["Human / Approval / Blocker"]
+    REPLAN -->|"escalate"| ESC
     REPLAN -->|"finish"| DOD{"Goal / DoD satisfied?"}
 
     DOD -->|"no"| RETRIEVE
     DOD -->|"yes"| FINAL["Final Judge"]
     FINAL --> DELIVERY
-    DELIVERY --> LEARN["Scoped Learning Signal"]
+    DELIVERY --> LEARN["System Learning Signal"]
 ```
 
-Scope is resolved before retrieval. Replanning remains continuous after bounded steps without widening that scope.
+Primary ADR coverage: **ADR-0018, ADR-0019, ADR-0020, ADR-0021, ADR-0022**.
 
-Primary ADR coverage: **ADR-0018, ADR-0019, ADR-0020, ADR-0021, ADR-0022, ADR-0026, ADR-0027**.
-
-## View 4 — Scoped Asset and Learning Lifecycle
+## View 4 — Reusable Asset and Learning Lifecycle
 
 ```mermaid
 flowchart LR
-    EXPERIENCE["Tenant / Workspace Experience"] --> LOCAL["Scoped Candidate\nSkill / Flow / Primitive / Eval"]
-    LOCAL --> TEST["Local Tests / Evals"]
-    TEST --> LOCALOK{"Stable locally?"}
-    LOCALOK -->|"no"| LOCAL
-    LOCALOK -->|"yes"| LSTABLE["Stable Local Asset"]
+    EXPERIENCE["Task / Production Experience"] --> KIND{"Reusable signal?"}
 
-    LSTABLE --> GENERAL["Generalize\nRemove local-only dependencies"]
-    GENERAL --> PR["PR: Global candidate"]
-    PR --> GEVAL["Review + Representative Evals"]
-    GEVAL --> GLOBALOK{"Pass Global gates?"}
-    GLOBALOK -->|"no"| LSTABLE
-    GLOBALOK -->|"yes"| MERGE["Merge"]
-    MERGE --> GSTABLE["New Global Git revision / tag"]
+    KIND -->|"repeated successful pattern"| PATTERN["Flow / Primitive Pattern"]
+    KIND -->|"reproducible failure"| FAILURE["Regression / Failure Signal"]
+    KIND -->|"repeated strategy / failure-mode lesson"| LESSON["Skill / Routing Lesson"]
+
+    PATTERN --> AGENT["Coding Agent Proposes Change"]
+    FAILURE --> AGENT
+    LESSON --> AGENT
+
+    AGENT --> ISOLATE["Isolate Candidate Change"]
+    ISOLATE --> CAND["Candidate Skill / Flow / Primitive / Eval"]
+    CAND --> TEST["Tests + Golden / Regression / Semantic Evals"]
+
+    TEST --> INC{"Pass gates and avoid regression\nvs stable incumbent?"}
+    INC -->|"no"| REPAIR["Repair / Reject / Keep Experimental"]
+    REPAIR --> ISOLATE
+    INC -->|"yes"| STABLE["Promote to Stable Reusable Asset"]
+    STABLE --> GIT[("Git: exact version / provenance")]
 ```
 
-For the MVP, the promotion mechanism is deliberately ordinary Git workflow: **candidate change → PR → review/tests/evals → merge → new Global revision**. No Promotion Service is required. Local stability and Global visibility remain separate decisions, and raw scoped memory has no direct Global promotion path.
+Primary ADR coverage: **ADR-0020, ADR-0021, ADR-0023, ADR-0024**.
 
-Primary ADR coverage: **ADR-0020, ADR-0021, ADR-0023, ADR-0024, ADR-0026, ADR-0027**.
-
-## View 5 — External Capability Boundary
+## View 5 — Trust / Deployment Boundary
 
 ```mermaid
 flowchart LR
-    SRC["External Capability Source"] --> STAGE["Stage"]
-    STAGE --> REVIEW["Review"]
-    REVIEW --> EVAL["Test / Eval"]
-    EVAL --> PIN["Pin Exact Version"]
-    PIN --> ADAPTER["Runtime / Connector Adapter"]
-    ADAPTER --> EXT["External Business System"]
+    SRC["Untrusted Sources\nExternal skills / MCP / web / tool outputs"]
+    STAGE["Stage"]
+    AUDIT["Inspect / Audit"]
+    SANDBOX["Sandbox / Test / Eval"]
+    PIN["Pin Exact Source / Version"]
+    TRUST["Explicitly Trusted Capability"]
+    ADAPTER["Runtime / Connector Adapter Boundary"]
+    EXT["External Business System"]
 
-    SCOPE["Resolved Tenant / Workspace Scope"] --> ADAPTER
+    SRC --> STAGE --> AUDIT --> SANDBOX --> PIN --> TRUST --> ADAPTER --> EXT
+
+    POLICY["Security Policy\nTenant isolation / credential scope / least privilege / approvals"] --> ADAPTER
+    DATA["External content is data/evidence,\nnot trusted control instructions"] --> AUDIT
 ```
 
-Primary ADR coverage: **ADR-0024, ADR-0025, ADR-0026, ADR-0027**.
+Primary ADR coverage: **ADR-0024, ADR-0025**.
 
-## View 6 — Strategy Selection and Telemetry Policy
+## View 6 — Strategy Selection and Solver Telemetry Policy
+
+This is a supplementary architecture policy view, not a C4 structural level.
 
 ```mermaid
 flowchart LR
@@ -190,64 +173,35 @@ flowchart LR
     S -->|"no"| REJECT
     S -->|"yes"| COST["Choose minimum expected cost\namong eligible candidates"]
     COST --> RUN["Execute / Promote"]
-    RUN --> TELEMETRY["Telemetry\nGoal progress / Prediction error / Information gain / Iteration cost / Reuse gain / Human intervention"]
+    RUN --> TELEMETRY["Telemetry\nGoal progress / Prediction error / Information gain / Iteration cost / Strategy survival / Reuse gain / Human intervention"]
 ```
 
 Primary ADR coverage: **ADR-0021, ADR-0022, ADR-0023**.
 
-## View 7 — C4 Deployment View
-
-```mermaid
-flowchart TB
-    GIT[("Shared Git Source of Truth\nGlobal Skill / Flow / Primitive / Eval revisions")]
-
-    I1["Deployment Node: Solver Instance 1\npinned Global assets: vX"]
-    I2["Deployment Node: Solver Instance 2\npinned Global assets: vX"]
-    I3["Deployment Node: Solver Instance 3\npinned Global assets: vY canary"]
-
-    D1[("Scoped data\nTenant A / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
-    D2[("Scoped data\nTenant B / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
-    D3[("Scoped data\nTenant C / Workspaces / Tasks / Runs\nMemory + RAG + operational state")]
-
-    GIT -.->|"checkout / deploy exact revision"| I1
-    GIT -.->|"checkout / deploy exact revision"| I2
-    GIT -.->|"checkout / deploy exact revision"| I3
-
-    I1 --> D1
-    I2 --> D2
-    I3 --> D3
-```
-
-The Git arrows represent **versioned distribution, not synchronous runtime registry calls**. Sharing the same Global Flow/Skill/Primitive/Eval revision does not create a path between Tenant data stores. Instance placement/version selection may initially be ordinary deployment configuration or environment variables; no Fleet Manager or Deployment Registry service is required.
-
-The same logical Tenant/Workspace/Task/Run contracts also support a shared multi-tenant instance or a fully isolated tenant stack later. A runtime instance remains infrastructure, not a hierarchy level.
-
-Primary ADR coverage: **ADR-0020, ADR-0024, ADR-0026, ADR-0028**.
-
 ## ADR → Architecture View Traceability
 
-| ADR | Context | Container | Dynamic | Learning | External | Policy | Deployment |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| 0017 Root Skill + Coding Agent | ✅ | ✅ |  |  |  |  |  |
-| 0018 Lifecycle + Complexity Routing |  |  | ✅ |  |  |  |  |
-| 0019 Deterministic Planning + Replanning |  | ✅ | ✅ |  |  |  |  |
-| 0020 Reusable Asset Model + Retrieval |  | ✅ | ✅ | ✅ |  |  | ✅ |
-| 0021 Verification / Eval / Promotion |  |  | ✅ | ✅ |  | ✅ |  |
-| 0022 Quality → Reliability → SLA → Cost |  |  | ✅ |  |  | ✅ |  |
-| 0023 Learning + Controlled Self-Modification |  |  |  | ✅ |  | ✅ |  |
-| 0024 Persistence + Provenance |  | ✅ |  | ✅ | ✅ |  | ✅ |
-| 0025 Runtime + Connector Boundary | ✅ | ✅ |  |  | ✅ |  |  |
-| 0026 Scope Hierarchy + Tenant Isolation | ✅ | ✅ | ✅ | ✅ | ✅ |  | ✅ |
-| 0027 Context Assembly + Memory Scoping | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |
-| 0028 Runtime Topology |  |  |  |  |  |  | ✅ |
+Every active ADR must either be visible in at least one canonical Mermaid view or be explicitly marked as a non-visual policy. At present, all active ADRs have a visual projection.
+
+| ADR | Context | Container | Dynamic | Learning | Trust | Policy | Coverage |
+|---|---:|---:|---:|---:|---:|---:|---|
+| **0017 Root Skill + Coding Agent** | ✅ | ✅ |  |  |  |  | Covered |
+| **0018 Lifecycle + Complexity Routing** |  |  | ✅ |  |  |  | Covered |
+| **0019 Deterministic Planning + Replanning** |  | ✅ | ✅ |  |  |  | Covered |
+| **0020 Reusable Asset Model + Retrieval** |  | ✅ | ✅ | ✅ |  |  | Covered |
+| **0021 Verification / Eval / Promotion** |  |  | ✅ | ✅ |  | ✅ | Covered |
+| **0022 Quality → Reliability → SLA → Cost + Telemetry** |  |  | ✅ |  |  | ✅ | Covered |
+| **0023 Learning + Controlled Self-Modification** |  |  |  | ✅ |  | ✅ | Covered |
+| **0024 Persistence + Provenance** |  | ✅ |  | ✅ | ✅ |  | Covered |
+| **0025 Runtime + Connector Boundary** | ✅ | ✅ |  |  | ✅ |  | Covered |
 
 ## Architecture consistency rule
 
 When an Accepted/Experimental ADR changes:
 
-1. update all affected canonical views in the same change;
-2. update the traceability matrix;
-3. if no diagram should change, mark the ADR as policy-only and explain why;
-4. do not add a diagram merely to duplicate ADR prose.
+1. identify which canonical view(s) it affects;
+2. update those Mermaid views in the same architecture change;
+3. update this traceability matrix;
+4. if no diagram should change, explicitly state that the ADR is policy-only and why;
+5. do not create a new diagram merely to duplicate ADR prose.
 
-ADR-0001…ADR-0016 remain historical records superseded by the active ADR set.
+ADR-0001…ADR-0016 are historical records superseded by the active ADR set.
