@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "time": {
+      "unit": "hours_per_week",
+      "available": 20
+    },
+    "money": {
+      "unit": "currency",
+      "available": 50000
+    },
+    "attention": {
+      "unit": "ordinal_1_5",
+      "available": 3,
+      "note": "User-owned estimate; do not convert to money unless explicitly modeled."
+    },
+    "people": [],
+    "infrastructure": []
+  }
+}

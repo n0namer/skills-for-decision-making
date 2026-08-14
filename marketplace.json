@@ -7,6 +7,18 @@
   "source": "Kochenderfer, Wheeler & Wray, Algorithms for Decision Making (MIT Press, 2022)",
   "skills": [
     {
+      "slug": "adaptive-problem-solver",
+      "name": "Adaptive Problem Solver",
+      "path": "adaptive-problem-solver/SKILL.md",
+      "description": "Root skill for adaptive problem solving across business, research, operations, coding and other open-ended tasks. Routes simple work directly, reuses tested flows/primitives, plans and verifies non-trivial work, replans on new evidence, and turns repeated successful behavior or failures into reusable flows, primitives and evals."
+    },
+    {
+      "slug": "decision-orchestrator",
+      "name": "Decision Orchestrator",
+      "path": "decision-orchestrator/SKILL.md",
+      "description": "Automatically routes ordinary decision, prioritization, project portfolio, resource allocation, research-vs-act, plan robustness, metric-signal, competitor and retrospective questions to the minimum useful pipeline of decision skills and deterministic calculators. Use this instead of asking the user to name framing-decisions, valuing-information, allocating-effort or other internal skills. Also use when a decision should consider the user's active projects, available time, money, attention or other resources stored in .agents/context."
+    },
+    {
       "slug": "framing-decisions",
       "name": "Framing Decisions",
       "path": "framing-decisions/SKILL.md",

@@ -1,0 +1,22 @@
+[
+  {"id":"choice-ru","request":"Стоит ли запускать этот SaaS сейчас?","expected":["framing-decisions"]},
+  {"id":"allocation-ru","request":"Как распределить 40 часов между тремя проектами?","expected":["framing-decisions","allocating-effort"]},
+  {"id":"research-or-act-ru","request":"Стоит ли ещё исследовать рынок или уже запускаться?","expected":["framing-decisions","valuing-information"]},
+  {"id":"test-first-ru","request":"Сначала провести тест спроса или сразу запускаться?","expected":["framing-decisions","valuing-information"]},
+  {"id":"horizon-ru","request":"Какой горизонт планирования выбрать для продукта?","expected":["planning-horizons"]},
+  {"id":"roadmap-ru","request":"Что сначала делать в roadmap продукта?","expected":["planning-horizons"]},
+  {"id":"stress-plan-ru","request":"Проверь план запуска на слабые места.","expected":["stress-testing-plans"]},
+  {"id":"premortem-ru","request":"Сделай премортем перед запуском проекта.","expected":["stress-testing-plans"]},
+  {"id":"metric-ru","request":"Конверсия выросла с 4% до 5%. Это реальный сигнал?","expected":["tracking-beliefs"]},
+  {"id":"signal-noise-ru","request":"Это изменение метрики — сигнал или шум?","expected":["tracking-beliefs"]},
+  {"id":"competitor-ru","request":"Конкурент резко снизил цены. Что это значит?","expected":["reading-rivals"]},
+  {"id":"rival-en","request":"What does this rival price cut tell us?","expected":["reading-rivals"]},
+  {"id":"retro-ru","request":"Проведи ретро по нашему прошлому решению.","expected":["learning-from-outcomes"]},
+  {"id":"outcome-ru","request":"Мы получили фактический результат хуже ожиданий. Где ошиблись?","expected":["learning-from-outcomes"]},
+  {"id":"choice-en","request":"Which option should I choose?","expected":["framing-decisions"]},
+  {"id":"allocation-en","request":"Allocate my budget across three projects.","expected":["framing-decisions","allocating-effort"]},
+  {"id":"research-en","request":"Do we need more data before launching?","expected":["framing-decisions","valuing-information"]},
+  {"id":"stress-en","request":"Stress-test the launch plan before we commit.","expected":["stress-testing-plans"]},
+  {"id":"roadmap-en","request":"What first step should come next in the roadmap?","expected":["planning-horizons"]},
+  {"id":"belief-en","request":"Update our belief after the new evidence arrived.","expected":["tracking-beliefs"]}
+]

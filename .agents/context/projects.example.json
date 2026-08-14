@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "id": "project-a",
+      "name": "Project A",
+      "status": "active",
+      "stage": "validation",
+      "goal": "Get 5 qualified customer conversations by Friday",
+      "nextMilestone": "Run a small reversible demand test",
+      "constraints": ["Maximum 10 hours this week"]
+    },
+    {
+      "id": "project-b",
+      "name": "Project B",
+      "status": "active",
+      "stage": "build",
+      "goal": "Ship the first usable vertical slice",
+      "nextMilestone": "Complete one end-to-end user flow",
+      "constraints": []
+    }
+  ]
+}

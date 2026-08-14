@@ -1,0 +1,52 @@
+{
+  "skill_name": "adaptive-problem-solver",
+  "evals": [
+    {
+      "id": "aps-001",
+      "name": "Routes trivial action without over-planning",
+      "prompt": "Use the adaptive problem solver. Create a calendar reminder for tomorrow at 10:00. Explain only the execution approach; do not actually access a calendar.",
+      "expected_output": "Classifies the request as L0/direct action, avoids the full adaptive planning loop, and identifies a calendar primitive/tool as sufficient.",
+      "assertions": [
+        "Treats this as an L0 Action or equivalent direct primitive path.",
+        "Does not invent a multi-step L2/L3 plan.",
+        "Prefers an existing calendar capability/tool over writing new workflow code."
+      ]
+    },
+    {
+      "id": "aps-002",
+      "name": "Retrieves reusable flow before composing supplier research",
+      "prompt": "Use the adaptive problem solver to plan how an assistant should find and compare 10 suppliers for restaurant equipment. The system has a supplier-search flow and web/company-verification primitives already available.",
+      "expected_output": "Reuses or adapts the supplier-search flow, defines verifiable criteria, executes bounded steps with verification, and only composes new code if the existing flow is insufficient.",
+      "assertions": [
+        "Searches/reuses the existing supplier-search flow before proposing new implementation.",
+        "Defines task-level and step-level verifiable criteria.",
+        "Uses primitives as dependencies rather than treating prose instructions as the workflow.",
+        "Includes verify/update/replan behavior for material new evidence."
+      ]
+    },
+    {
+      "id": "aps-003",
+      "name": "Uses PlanPatch after new constraint",
+      "prompt": "A supplier-search task is halfway complete. New evidence says suppliers must have a warehouse in Krasnodar Krai. Use the adaptive problem solver to decide what happens next.",
+      "expected_output": "Updates task state, identifies affected downstream steps, creates a typed PlanPatch or equivalent versioned replan, preserves history, and reruns only invalidated work.",
+      "assertions": [
+        "Does not silently rewrite the original plan.",
+        "Uses evidence-backed replanning with a typed reason such as NEW_CONSTRAINT.",
+        "Invalidates only dependent steps/results that are no longer valid.",
+        "Creates a new plan version or explicit PlanPatch."
+      ]
+    },
+    {
+      "id": "aps-004",
+      "name": "Converts production failure into regression evidence",
+      "prompt": "A reusable flow selected a supplier that does not deliver to the requested city. A human corrected the mistake. Explain how the adaptive problem solver should learn from this.",
+      "expected_output": "Treats the correction as evidence, fixes the relevant flow/primitive or verifier, adds a regression eval, tests the candidate change, and promotes only after passing quality gates.",
+      "assertions": [
+        "Creates or proposes an executable regression case for the failure class.",
+        "Distinguishes current-task correction from system-level learning.",
+        "Requires tests/evals before promoting modified executable assets.",
+        "Does not rely only on textual self-reflection."
+      ]
+    }
+  ]
+}

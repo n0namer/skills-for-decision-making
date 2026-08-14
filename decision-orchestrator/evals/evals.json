@@ -1,0 +1,85 @@
+{
+  "skill_name": "decision-orchestrator",
+  "evals": [
+    {
+      "id": 1,
+      "name": "routes-portfolio-allocation-without-user-skill-selection",
+      "prompt": "I have 20 hours this week and three active projects. Help me decide where to put the time. Do not make me choose a framework.",
+      "expected_output": "Treats skill selection as internal, frames the competing projects and routes the request through the minimum allocation pipeline rather than asking the user to name a skill. Uses available project/resource context if present and keeps numerical allocation in deterministic calculators when possible.",
+      "files": [],
+      "assertions": [
+        "Does not ask the user which skill or framework to use",
+        "Uses or routes through framing-decisions and allocating-effort, rather than unrelated skills",
+        "Treats the 20 hours as a scarce resource across competing alternatives",
+        "Distinguishes missing project evidence from zero-value inputs"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "routes-research-versus-act-to-value-of-information",
+      "prompt": "Should we spend another week researching this market or launch a small demand test now?",
+      "expected_output": "Routes the ordinary-language question through decision framing and value-of-information logic. It compares the value of learning with research cost and delay instead of merely recommending more research.",
+      "files": [],
+      "assertions": [
+        "Does not require the user to mention valuing-information by name",
+        "Frames the decision before evaluating additional information",
+        "Considers both the cost of research and the cost of delay",
+        "Prefers a bounded reversible test when it dominates further information gathering"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "refuses-to-invent-mcda-weights",
+      "prompt": "Compare three projects on money, time, stress, risk and strategic value. I have not decided how important each criterion is.",
+      "expected_output": "Recognizes a multi-criteria decision but does not fabricate criterion weights. Uses Pareto-style comparison or asks for explicit value ownership only if a final ranking truly requires it.",
+      "files": [],
+      "assertions": [
+        "Does not invent percentages or MCDA weights",
+        "Keeps money, time, stress, risk and strategic value as separate criteria",
+        "Uses Pareto analysis when complete weights are absent",
+        "States which trade-off remains a value judgment if the Pareto frontier has multiple options"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "routes-past-outcome-to-learning",
+      "prompt": "A month ago we predicted this launch had a 70% chance of success. It failed. Review the decision without pretending the bad outcome proves the decision was bad.",
+      "expected_output": "Routes to learning-from-outcomes, separates decision quality from outcome quality, scores or preserves the prior forecast for calibration, and records the observed outcome as new evidence rather than rewriting the original prediction.",
+      "files": [],
+      "assertions": [
+        "Separates a bad outcome from a bad ex-ante decision",
+        "Preserves the original 70% forecast as a falsifiable prior record",
+        "Uses learning-from-outcomes or equivalent calibration logic",
+        "Treats the new outcome as appended evidence rather than rewriting history"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "executes-selected-pipeline-instead-of-returning-routing-only",
+      "prompt": "Use decision-orchestrator. I have 12 hours and need to choose how to split them between two projects. Give me the actual decision, not a list of frameworks.",
+      "expected_output": "Runs the selected framing and allocation pipeline through to a synthesized decision. Skill names may appear only as debug/provenance; the normal answer contains the result of applying them, not merely a routing recommendation.",
+      "files": [],
+      "assertions": [
+        "Does not stop after saying that framing-decisions and allocating-effort should be used",
+        "Actually applies the selected skill instructions to the user's problem",
+        "Carries outputs from earlier pipeline steps into later steps",
+        "Returns one synthesized user-facing decision or an explicit missing-input blocker"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "update-fetch-external-context-and-run-from-one-revision",
+      "prompt": "Update the decision skills from GitHub, read my current projects from the connected project database, and run decision-orchestrator to evaluate the portfolio.",
+      "expected_output": "After updating, reloads the entry skill from the new revision, retrieves project context through the host agent's available tool/connector, normalizes that context into the execution bundle, verifies runtime revision coherence, and executes every selected pipeline step. It must not use a stale pre-update SKILL.md and must not stop at orchestrate plan output.",
+      "files": [],
+      "assertions": [
+        "Does not rely on a decision-orchestrator instruction loaded before the update",
+        "Uses the host agent's connected data tool instead of requiring a provider-specific SDK in the repository",
+        "Passes retrieved project data into the orchestration context rather than keeping it only in free-form chat memory",
+        "Uses bundle or equivalent executable materialization rather than treating plan as completion",
+        "Verifies the orchestration runtime revision matches the newly installed source revision",
+        "Executes framing-decisions and allocating-effort when selected, instead of merely naming them"
+      ]
+    }
+  ]
+}

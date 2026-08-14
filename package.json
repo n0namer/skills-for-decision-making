@@ -5,12 +5,36 @@
   "type": "module",
   "license": "MIT",
   "bin": {
-    "sdm": "scripts/calc.js"
+    "sdm": "scripts/calc.js",
+    "sdm-decision": "scripts/decision.js",
+    "sdm-orchestrate": "scripts/orchestrate.js",
+    "sdm-context-init": "scripts/init-context.js",
+    "sdm-skills": "scripts/skills.js",
+    "sdm-skills-install": "scripts/install-skills.js"
   },
   "files": [
     "lib/",
     "scripts/",
-    "examples/"
+    "examples/",
+    "engine/",
+    ".agents/context/*.example.*",
+    "adaptive-problem-solver/",
+    "decision-orchestrator/",
+    "framing-decisions/",
+    "valuing-information/",
+    "allocating-effort/",
+    "planning-horizons/",
+    "stress-testing-plans/",
+    "tracking-beliefs/",
+    "reading-rivals/",
+    "learning-from-outcomes/",
+    "requirements-decision-engine.txt",
+    "skills.sources.json",
+    "update-policy.json",
+    "AGENTS.md",
+    "UPDATE.md",
+    "docs/skill-lifecycle.md",
+    "docs/architecture/"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
@@ -24,9 +48,17 @@
   },
   "keywords": [
     "agent-skills",
+    "adaptive-problem-solving",
     "decision-making",
+    "skill-orchestration",
+    "flow-reuse",
+    "replanning",
+    "project-portfolio",
+    "resource-allocation",
     "expected-utility",
     "value-of-information",
+    "mcda",
+    "topsis",
     "bandit",
     "thompson-sampling"
   ]

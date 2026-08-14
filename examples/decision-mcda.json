@@ -1,0 +1,100 @@
+{
+  "version": "1.0",
+  "decision": {
+    "id": "project-choice",
+    "title": "Choose the best next project",
+    "objective": "Maximize business value without ignoring time, risk, or psychological load"
+  },
+  "criteria": [
+    {
+      "id": "expected_profit",
+      "name": "Expected profit",
+      "direction": "max",
+      "weight": 0.35,
+      "unit": "RUB"
+    },
+    {
+      "id": "time_hours",
+      "name": "Founder time",
+      "direction": "min",
+      "weight": 0.2,
+      "unit": "hours"
+    },
+    {
+      "id": "psychological_load",
+      "name": "Psychological load",
+      "direction": "min",
+      "weight": 0.2,
+      "unit": "0-10"
+    },
+    {
+      "id": "downside_risk",
+      "name": "Downside risk",
+      "direction": "min",
+      "weight": 0.15,
+      "unit": "0-10"
+    },
+    {
+      "id": "strategic_value",
+      "name": "Strategic value",
+      "direction": "max",
+      "weight": 0.1,
+      "unit": "0-10"
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "saas-a",
+      "name": "Build SaaS A",
+      "scores": {
+        "expected_profit": 500000,
+        "time_hours": 200,
+        "psychological_load": 8,
+        "downside_risk": 8,
+        "strategic_value": 9
+      }
+    },
+    {
+      "id": "saas-b",
+      "name": "Test SaaS B",
+      "scores": {
+        "expected_profit": 300000,
+        "time_hours": 80,
+        "psychological_load": 3,
+        "downside_risk": 4,
+        "strategic_value": 7
+      }
+    },
+    {
+      "id": "consulting",
+      "name": "Sell consulting",
+      "scores": {
+        "expected_profit": 250000,
+        "time_hours": 120,
+        "psychological_load": 5,
+        "downside_risk": 3,
+        "strategic_value": 4
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "profit-estimates",
+      "kind": "estimate",
+      "confidence": 0.5,
+      "source": "Current commercial assumptions"
+    },
+    {
+      "id": "time-estimates",
+      "kind": "estimate",
+      "confidence": 0.6,
+      "source": "Work breakdown estimate"
+    },
+    {
+      "id": "psychological-load",
+      "kind": "estimate",
+      "confidence": 0.7,
+      "source": "Decision maker self-rating"
+    }
+  ]
+}
